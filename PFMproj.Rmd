@@ -1,30 +1,545 @@
 ---
 title: "PFMproj"
 author: "Zoe Zhou"
-date: "15/01/2020"
-output: html_document
+date: "10/12/2019"
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+10/12/2019 
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+This data set is RAW data from subjects(physios) doing certain exercises
+||||||||||||||||||||||||||||||||Might need some cleaning|||||||||||||||||||||||||||||||||||||||
 
-```{r cars}
-summary(cars)
+----------------------------------------- TASK -----------------------------------------------
+We are looking for the peak pressure values among three contractions, to find which one or more than one sensors representing the active pelvic muscles. We are particularly interested in the variability of the result.
+
+***************************************** Note *********************************************
+--Each pressure measurement includes the __baseline atmosphere pressure__ due to the great sensitivity of the sensors. We might or might not need to exclude this baseline value during the investigation. Currently we are taking the value right (within 3-5 seconds) before each contraction to be treated as the initial pressure value. 
+--All the timestamps for contractions and rest, are recorded manually by the user, saved in JSON files. 
+
+~~ Pressure values are records at a frequency of 50 Hz. ~~
+~~ So 50 measurements per second. ~~
+
+11/12/2019 Corrected: We were using device _pfd0084_ which records measurements at a frequency of  __100 Hz__. So we have 100 measurements per second. 1 measurement every 10 milliseconds. 
+
+
+***
+##### Preparing packages
+```{r}
+# install.packages("tidyverse")
+# install.packages("rjson")
+# install.packages("quantmod")
+
+library(tidyverse)
+library(rjson)
+library(quantmod)
 ```
 
-## Including Plots
+##### Read in one dataset and its timestamps information
+```{r eval = FALSE}
+setwd("C:/Users/Pluie/Desktop/SS research/")
 
-You can also embed plots, for example:
+data_folders = list.files(pattern = "_csv")
+folder = data_folders[1]
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+# Get the data
+whole = read.csv(list.files(path = folder, pattern = ".csv", recursive = TRUE, full.names = TRUE))
+
+# Get the session json of this subject
+session = fromJSON(file = list.files(path = folder, pattern = "session.json", recursive = TRUE, full.names = TRUE))
+
+# Get the profile json file, so we have information about the exercises
+profile = fromJSON(file = list.files(path = folder, pattern = "profile", recursive = TRUE, full.names = TRUE))
+# or pattern = ".+(_)+.+.json"
+
+
+dim(whole)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+=== Question 1. 
+    What does each row and each column (17 cols in total) represent?
+
+=== Guess answer: 
+    Columns - We have 8 sensors? How 17?
+    
+=== Each row is one observation, representing all the pressure measurement values at one measure(one timestamp?)
+
+=== Answer ===
+    First column is Time.
+    Column 2 to 9 are pressure values from sensor 1 to 8.
+    Column 10 to 17 are temperature values from sensor 1 to 8.
+
+=== Each row is one observation at a time point. We have one observation every 20 milliseconds. 
+    Missing data were removed so might not be consistent.
+    
+    
+##### Rename columns and drop temperature data
+```{r eval = FALSE}
+colnames(whole) = c("rectime", paste0("p", 1:8), paste0("t", 1:8))
+data = whole %>% select(-(t1:t8))
+```
+
+###### A function that tidys up a given dataset
+```{r}
+tidy = function(data){
+  data %>%
+  gather(sensor, pressure, p1:p8) %>%
+  mutate(sensor = as.factor(sensor))
+}
+```
+
+##### Plot the whole thing
+```{r eval = FALSE}
+tidy(data) %>% ggplot(aes(x = rectime, y = pressure, group = sensor, color = sensor)) +
+  geom_line(position = position_dodge(width = 0.2)) +
+  labs(x = "Recording Time (in ms)", y = "Pressure (in mm Hg)",
+       title = "Pressure change during the whole session",
+       subtitle = "For patient 0007") +
+  scale_color_brewer(palette = "Set1") +
+  guides(color = guide_legend(override.aes = list(size = 5)))
+```
+
+##### Exclude the last extreme part and plot
+```{r eval = FALSE}
+tidy(data[(1:(nrow(data)-500)), ]) %>% ggplot(aes(x = rectime, y = pressure, group = sensor, color = sensor)) +
+  geom_line(position = position_dodge(width = 0.2)) +
+  labs(x = "Recording Time (in ms)", y = "Pressure (in mm Hg)",
+       title = "Pressure change during the whole session",
+       subtitle = "For patient 0007") +
+  scale_color_brewer(palette = "Set1") + 
+  guides(color = guide_legend(override.aes = list(size = 5)))
+```
+
+
+=== Question 2. 
+    How do we enlarge the graph to get a clearer vision, hence better for investigation.
+
+=== Guess answer and trial attempts: 
+    Change axis setting, limits, log x axis? Change graph format, margins?
+    
+=== Answer ===
+    We can plot the pressure change for a shorter amount of time, due to the size of our dataset.
+    Additionally, we are more interested in pressure change when each contraction happens.
+    A fair amount of unwanted data exists so we need subsetting.
+    
+-------------------------------------------- COMMENT -----------------------------------------
+Above we plot the whole thing, which is unnecessary. Now we need to find the starting and ending timestamp for each contraction. Then subset our data to get a smaller(more detailed) graph.
+
+===============================  Helper functions ==============  
+
+###### A function to obtain all available exercise ids (as a list)
+```{r}
+get_id_list = function(){
+  # Get the exercise list length
+  N = length(exercise_list)
+  
+  # Initialise an empty id list
+  id_list = vector("list", N)
+  
+  # Loop through the exercise list to get every exercise id
+  for (i in (1:N)) {
+    id_list[[i]] = exercise_list[[i]]$id
+    i = i + 1
+  }
+  
+  id_list 
+  
+}
+```
+
+###### A function that obtain the description for a rough input exercise name (id)
+```{r}
+get_description = function(id){
+  id_list = get_id_list()
+
+  # Get the exercise order in the list
+  id_order = grep(id, id_list)
+  
+  if (length(id_order) == 0) {
+    description = NULL
+  } else {
+    
+  # Get the exercise
+    exercise_list[[id_order]]
+    
+  # Get the description
+  description = exercise_list[[id_order]]$activity
+  }
+  
+  description
+}
+```
+
+
+###### A function of extracting start/stop time for a given exercise
+```{r}
+getrectime = function(folder, exercise){
+  # Get the session json of this subject
+  session = fromJSON(file = list.files(path = folder, pattern = "session.json", recursive = TRUE, full.names = TRUE))
+
+  # Get the profile json file, so we have information about the exercises
+  profile = fromJSON(file = list.files(path = folder, pattern = "profile", recursive = TRUE, full.names = TRUE))
+  # or pattern = ".+(_)+.+.json"
+
+  exercise_list = profile$exercise_groups[[1]]$exercises
+
+  # Get the starting time from recordings
+  rec = session$recordings
+  start = rec[[1]]$start
+  
+  # Get the order of the exercise in exercise_order
+  order = grep(exercise, session$exercise_order)
+  
+  # Get the pfmc exercise start and stop timestamps
+  exercise_start = session$exercises[[order]]$start
+  exercise_stop = session$exercises[[order]]$stop
+  
+  # Subtract the initial recording start timestamp to get the approximate time
+  exercise_start_time = round((exercise_start - start) / 10) * 10
+  exercise_stop_time = round((exercise_stop - start) / 10) * 10
+  
+  list(exercise_start_time, exercise_stop_time)
+}
+```
+
+###### A function of subsetting data for a given time
+```{r}
+getsubdata = function(data, start, stop){
+  
+  if (start < min(data$rectime)){
+    stop(paste0("Sorry, data missing for recording time before ", min(data$rectime), " s."))
+  }
+  
+  if (stop > max(data$rectime)){
+    stop(paste0("Sorry, data missing for recording time after ", max(data$rectime), " s."))
+  }
+  
+  data %>% filter(rectime >= start, rectime <= stop)
+}
+```
+
+An example of calling the above 2 functions
+```{r}
+# rectime = getrectime(exercise = "relax30s")
+# relaxdata = getsubdata(data, rectime[[1]], rectime[[2]])
+```
+
+***
+
+##### Load in JSON file and make use of the it
+```{r eval = FALSE}
+library(rjson)
+session = fromJSON(file = "session.json")
+```
+
+##### Get the pfmc data and plot it
+```{r eval = FALSE}
+name = "pfmc"
+rectime = getrectime(name)
+pfmcdata = getsubdata(data, rectime[[1]], rectime[[2]])
+```
+
+
+```{r eval = FALSE}
+# Plot the pressure values during pfmc rectime (in ms)
+pfmcdata %>%
+  tidy() %>%
+  ggplot(aes(x = rectime, y = pressure, group = sensor, color = sensor)) +
+  geom_line(position = position_dodge(width = 0.2)) +
+  labs(x = "Recording Time (in ms)", y = "Pressure (in mm Hg)",
+       title = "Pressure change during the PFMC exercise",
+       caption = get_description(name)) +
+  scale_color_brewer(palette = "Set1")  + 
+  guides(color = guide_legend(override.aes = list(size = 5)))
+```
+
+##### Create a new time variable, and add a axis labelling in seconds
+---Create a new time variable , by subtracting the recording time variable by its starting time (the minimal value)
+
+```{r eval = FALSE}
+pfmcdata$time = pfmcdata$rectime - min(pfmcdata$rectime)
+```
+
+---Note, there are some missingness in the data (time gap is not always 10 ms) 
+
+** This might cause a slipperage in data (a drastic drop)
+
+** E.g. Row 165, 166, time gap is 40ms, we lost the data in between **
+```{r eval = FALSE}
+recno = ifelse(diff(pfmcdata$rectime) == 10, "good", NA)
+sum(is.na(recno))
+pfmcdata$isna = c(recno, NaN)
+```
+
+Apparently, we have 15 missing values. But so far, it does not affect our plotting.
+
+#####--- The following plot has perfect time labelling so no need to change (no need to call plot function)
+```{r eval = FALSE}
+pfmc_plot = pfmcdata %>%
+  tidy() %>%
+  ggplot(aes(x = time, y = pressure, group = sensor, color = sensor)) +
+  geom_line(position=position_dodge(width=0.2)) +
+  scale_x_discrete(limits = c(0, 15000, 20000, 30000, 35000, 45000, 50000),
+                   labels = c("0s", "15s", "20s", "30s", "35s", "45s", "50s")) +
+  labs(x = "Time (in s)", y = "Pressure (in mm Hg)",
+       title = "Pressure change during the PFMC exercise",
+       caption = get_description(name)) + 
+  scale_color_brewer(palette = "Set1") + 
+  guides(color = guide_legend(override.aes = list(size = 5)))
+
+pfmc_plot
+```
+But since the recording process was maunally done by the physio, take the response time for the subject into consideration.
+
+Now we need to get rid of the baseline, so we focus on change for each sensor.
+Which sensor(s) changed the most? 
+
+
+*** 
+
+### Now define some functions to automatic the whole thing
+
+###### A function plot pressure values vs time (in seconds), where the time variable is indicating how long after the this exercise has begun
+
+```{r}
+plot = function(exercisedata, name = NULL){
+  # mutate a new time variable 
+  # by subtract the recoring time varibale by its starting time (minimal value)
+  # Note, there are some missingness
+  exercisedata$time = exercisedata$rectime - min(exercisedata$rectime)
+  
+  timelength = max(exercisedata$time)
+  
+  # Default time gap is 1s
+  gap = 1000
+  
+  # Take 5s as the gap if total time is greater than 30 seconds
+  if (timelength > 30000) { gap = 5000 }
+  
+  # Take 10s as the gap if total time is greater than 100 seconds
+  if (timelength > 100000) { gap = 10000 }
+  
+  # Take 50s as the gap if total time is greater than 30 seconds
+  if (timelength > 500000) { gap = 50000 }
+
+  if (is.null(name) == TRUE) {
+    description = NULL
+    } 
+  else {
+    description = paste("Instruction:", get_description(name)) 
+    }
+
+  exercisedata %>% 
+    tidy() %>%
+    ggplot(aes(x = time, y = pressure, color = sensor)) +
+    geom_line(position = position_dodge(width = 0.2)) +
+    scale_x_discrete(limits = seq(0, round(max(exercisedata$time)/1000)*1000, gap), 
+                     labels = seq(0, round(max(exercisedata$time)/1000), gap/1000)) +
+    labs(x = "Time (in s)", y = "Pressure (in mm Hg)",
+         title = paste("Pressure change during the exercise of", name),
+         caption = description) +
+    scale_color_brewer(palette = "Set1") + 
+    guides(color = guide_legend(override.aes = list(size = 5)))
+
+}
+
+```
+
+###### Not so useful but exist ####
+###### A function plot the pressure change vs rectime (in ms) (rectime is the original recording time variable in data)
+```{r eval = FALSE}
+plot2 = function(exercisedata, name = NULL){
+  if (is.null(name) == TRUE) {description = NULL} 
+  else {description = paste("Instruction:", get_description(name))}
+
+  exercisedata %>% 
+    tidy() %>%
+    ggplot(aes(x = rectime, y = pressure, group = sensor, color = sensor)) +
+    geom_line(position = position_dodge(width = 0.2)) +
+    labs(x = "Recording Time (in ms)", y = "Pressure (in mm Hg)",
+         title = paste("Pressure change during the excise of", name),
+         caption = description) +   
+    scale_color_brewer(palette = "Set1") + 
+    guides(color = guide_legend(override.aes = list(size = 5)))
+
+}
+```
+
+***
+##### Finding baseline: Rough Guess
+
+As each sensor has a different initial pressure value at the start of the pfmc exercise, the patterns of pressure changes are not so easy-to-understand. Hence we should remove the baseline pressure values and focus on the changes. Then we can get a better idea of which sensor has the greatest change.
+
+General Method:
+Find a rest period of at least 2 seconds with relatively stable pressure values, average it out for each sensor and treat it as the baseline.
+
+Question:
+How to find this *stable rest period*?
+
+Procedure:
+We attempted 3 times taking 3 different rest periods. 
+Attemp1: Take the first exercise, relax 30 seconds. 
+
+Attempt2: Take all the time before the first contraction. Means when the device started recording, we get rest data, until the subject start to contract.
+
+Attempt3: Take the 15s rest time within the pfmc exercise. 
+
+After taking out the average pressure values for each sensor, all these 3 trials gave very similar output. Regarding to the negative values, they can be explained by the sucction of the sensor member, resulting the pressure decrease.
+
+However, the 3rd attempt gave the most reliable initial value(closest to 0), so we will be using this approach for all subjects.
+
+See R code below:
+#### I just want to see the change 
+
+###### A function to mutate a pressure `change` column
+```{r}
+baseline = function(data, relaxdata){
+  newdata = sweep(data[-1], 2, colMeans(relaxdata[-1]))
+  newdata$rectime = data$rectime
+  newdata
+}
+```
+
+
+##### Attempt1 - If we just take the first exercise (relax 30 seconds)
+```{r eval = FALSE}
+name = "relax30s"
+
+# Subset out data for the first exercise
+rectime = getrectime(name)
+relaxdata = getsubdata(data, rectime[[1]], rectime[[2]])
+
+# Plot the relax data so that we can compare
+(relax_plot = plot(relaxdata, name))
+
+# Lets call the function and have a look at the change for the while session
+newdata = baseline(relaxdata) 
+
+plot(newdata[(1:(nrow(newdata) - 500)), ]) + labs(title = "Pressure change during the whole session")
+
+summary(newdata$pressure)
+
+# Zoom in to see just the pressure change during pfmc exercise
+# Subset the pfmc data
+name = "pfmc"
+rectime = getrectime(name)
+pfmcchange = getsubdata(newdata, rectime[[1]], rectime[[2]])
+
+plot(pfmcchange, name)
+# Compare with our previous plot
+pfmc_plot
+```
+
+###### Comment
+The initial did not start as 0, which means our baseline values might be problematic.
+
+However, looking at the peak sensors, the color was not consistent. 
+ 
+We can see, from the whole plot, we have a great amount of negative values.
+
+##### Attempt2 - If we take all the resting time before contraction (start from recording)
+```{r eval = FALSE}
+rectime = getrectime("pfmc")
+attempt2 = getsubdata(data, 40, rectime[[1]] + 15000)
+plot(attempt2) + labs(title = "Pressure change from the begining to the first contraction")
+
+newdata = baseline(data, attempt2)
+
+# Subset the pfmc data
+pfmcchange = getsubdata(newdata, rectime[[1]], rectime[[2]])
+
+plot(pfmcchange, name)
+```
+
+##### Attempt3 - If we take the 15s resting time before contraction (start from the begining of pfmc exercise)
+```{r eval = FALSE}
+rectime = getrectime("pfmc")
+attempt3 = getsubdata(data, rectime[[1]], rectime[[1]] + 15000)
+plot(attempt3, name = "pfmc") + labs(subtitle = "Pressure change during the first 15s resting time")
+
+newdata = baseline(data, attempt3)
+
+# Subset the pfmc data
+pfmcchange = getsubdata(newdata, rectime[[1]], rectime[[2]])
+
+plot(pfmcchange, name)
+```
+
+###### A run-everything process function - return the pfmc datasets
+```{r}
+process = function(folder){
+  # Get the data
+  whole = read.csv(list.files(path = folder, pattern = ".csv", recursive = TRUE, full.names = TRUE))
+  
+  # Get the session json of this subject
+  # session = fromJSON(file = list.files(path = folder, pattern = "session.json", recursive = TRUE, full.names = TRUE))
+  
+  # Get the profile json file, so we have information about the exercises
+  # profile = fromJSON(file = list.files(path = folder, pattern = "profile", recursive = TRUE, full.names = TRUE))
+  # or pattern = ".+(_)+.+.json"
+  
+  # exercise_list = profile$exercise_groups[[1]]$exercises
+
+  # Rename columns
+  colnames(whole) = c("rectime", paste0("p", 1:8), paste0("t", 1:8))
+
+  data = whole %>% select(-(t1:t8))
+
+  #list(plot(pfmcdata), plot2(pfmcdata))
+  
+  # Get the start/end time of the pfmc exercise
+  name = "pfmc"
+  rectime = getrectime(folder, name)
+  
+  # Get pfmc data
+  pfmcdata = getsubdata(data, rectime[[1]], rectime[[2]])
+  
+  # Get the resting period - stable data
+  attempt3 = getsubdata(data, rectime[[1]], rectime[[1]] + 15000)
+
+  # Take out the baseline from data
+  newdata = baseline(data, attempt3)
+  
+  # Subset the pfmc data
+  pfmcchange = getsubdata(newdata, rectime[[1]], rectime[[2]])
+  
+  # Retutn pfmc dataset, one original, one change
+  list(pfmcdata, pfmcchange)
+
+}
+```
+
+##### Now call the big nice function and check out the graphic results
+```{r}
+# Find folders that contain our data
+data_folders = list.files(pattern = "_csv")
+folder = data_folders[1]
+
+pfmcdatalist = lapply(data_folders, process)
+
+for (l in pfmcdatalist) {
+  print(lapply(l, plot))
+}
+
+```
+
+
+
+###### ------------------Lets explore the peaks ------------------------######
+```{r}
+
+```
+
+
+
+18/12/2019
+Suggestion :
+Principal component analysis (PCA)
+changepoints (package)
+findpeaks (function)
+
