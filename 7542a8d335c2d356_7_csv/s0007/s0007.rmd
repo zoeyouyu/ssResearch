@@ -1,9 +1,16 @@
+---
+title: "s0007"
+author: "Zoe Zhou"
+date: "10/12/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
 ##### Preparing packages
 ```{r}
-getwd()
-setwd("C:/Users/Pluie/Desktop/SS research/7542a8d335c2d356_7_csv/s0007")
-
-
 # install.packages("tidyverse")
 # install.packages("rjson")
 # install.packages("quantmod")
@@ -23,6 +30,23 @@ exercise_list = profile$exercise_groups[[1]]$exercises
 dim(whole)
 ```
 
+
+=== Question 1. 
+    What does each row and each column (17 cols in total) represent?
+
+=== Guess answer: 
+    Columns - We have 8 sensors? How 17?
+    
+=== Each row is one observation, representing all the pressure measurement values at one measure(one timestamp?)
+
+=== Answer ===
+    First column is Time.
+    Column 2 to 9 are pressure values from sensor 1 to 8.
+    Column 10 to 17 are temperature values from sensor 1 to 8.
+
+=== Each row is one observation at a time point. We have one observation every 20 milliseconds. 
+    Missing data were removed so might not be consistent.
+   
 ##### Rename columns and drop temperature data
 ```{r}
 colnames(whole) = c("rectime", paste0("p", 1:8), paste0("t", 1:8))
@@ -40,9 +64,12 @@ tidy = function(data){
 
 ##### Plot the whole thing
 ```{r}
-tidy(data) %>% ggplot(aes(x = rectime, y = pressure, group = sensor, color = sensor)) +
+tidy(data) %>% 
+  ggplot(aes(x = rectime, y = pressure, 
+             group = sensor, color = sensor)) +
   geom_line(position = position_dodge(width = 0.2)) +
-  labs(x = "Recording Time (in ms)", y = "Pressure (in mm Hg)",
+  labs(x = "Recording Time (in ms)", 
+       y = "Pressure (in mm Hg)",
        title = "Pressure change during the whole session",
        subtitle = "For patient 0007") +
   scale_color_brewer(palette = "Set1") +
@@ -52,7 +79,8 @@ tidy(data) %>% ggplot(aes(x = rectime, y = pressure, group = sensor, color = sen
 ##### Exclude the last extreme part and plot
 ```{r}
 tidy(data[(1:(nrow(data)-500)), ]) %>% 
-  ggplot(aes(x = rectime, y = pressure, group = sensor, color = sensor)) +
+  ggplot(aes(x = rectime, y = pressure, 
+             group = sensor, color = sensor)) +
   geom_line(position = position_dodge(width = 0.2)) +
   labs(x = "Recording Time (in ms)", y = "Pressure (in mm Hg)",
        title = "Pressure change during the whole session",
@@ -61,6 +89,20 @@ tidy(data[(1:(nrow(data)-500)), ]) %>%
   guides(color = guide_legend(override.aes = list(size = 5)))
 ```
 
+
+=== Question 2. 
+    How do we enlarge the graph to get a clearer vision, hence better for investigation.
+
+=== Guess answer and trial attempts: 
+    Change axis setting, limits, log x axis? Change graph format, margins?
+    
+=== Answer ===
+    We can plot the pressure change for a shorter amount of time, due to the size of our dataset.
+    Additionally, we are more interested in pressure change when each contraction happens.
+    A fair amount of unwanted data exists so we need subsetting.
+    
+-------------------------------------------- COMMENT -----------------------------------------
+Above we plot the whole thing, which is unnecessary. Now we need to find the starting and ending timestamp for each contraction. Then subset our data to get a smaller(more detailed) graph.
 
 ===============================  Helper functions ==============  
 
@@ -109,6 +151,7 @@ get_description = function(id){
 
 
 ###### A function of extracting start/stop time for a given exercise
+(needs modification, needs parameter folder to pass on session variable)
 ```{r}
 getrectime = function(exercise){
   
@@ -163,7 +206,7 @@ pfmcdata = getsubdata(data, rectime[[1]], rectime[[2]])
 ```
 
 
-```{r }
+```{r}
 # Plot the pressure values during pfmc rectime (in ms)
 pfmcdata %>%
   tidy() %>%
@@ -196,7 +239,7 @@ pfmcdata$isna = c(recno, NaN)
 
 Apparently, we have 15 missing values. But so far, it does not affect our plotting.
 
-#####--- The following plot has perfect time labelling so no need to change (no need to call plot function)
+#####--- The following plot has perfect time labelling so no need to change (no need to call plot function that we define later)
 ```{r}
 (pfmc_plot = pfmcdata %>%
   tidy() %>%
@@ -212,9 +255,11 @@ Apparently, we have 15 missing values. But so far, it does not affect our plotti
  )
 
 ```
-But since the recording process was maunally done by the physio, take the response time for the subject into consideration.
 
-Now we need to get rid of the baseline, so we focus on change for each sensor.
+But since the recording process was maunally done by the physio, we need to take the response time for the subject into consideration.
+
+Now we are ready to take off the baseline values, so we can focus on changes in measurement for each sensor.
+
 Which sensor(s) changed the most? 
 
 
@@ -259,7 +304,7 @@ plot = function(exercisedata, name = NULL){
     scale_x_discrete(limits = seq(0, round(max(exercisedata$time)/1000)*1000, gap), 
                      labels = seq(0, round(max(exercisedata$time)/1000), gap/1000)) +
     labs(x = "Time (in s)", y = "Pressure (in mm Hg)",
-         title = paste("Pressure change during the exercise of", name),
+         title = paste("Pressure change during the exercise", name),
          caption = description) +
     scale_color_brewer(palette = "Set1") + 
     guides(color = guide_legend(override.aes = list(size = 5)))
@@ -271,8 +316,10 @@ plot = function(exercisedata, name = NULL){
 ###### A function plot the pressure change vs rectime (in ms) (rectime is the original recording time variable in data)
 ```{r}
 plot2 = function(exercisedata, name = NULL){
-  if (is.null(name) == TRUE) {description = NULL} 
-  else {description = paste("Instruction:", get_description(name))}
+  if (is.null(name) == TRUE) 
+    {description = NULL} 
+  else 
+    {description = paste("Instruction:", get_description(name))}
 
   exercisedata %>% 
     tidy() %>%
@@ -300,7 +347,7 @@ How to find this *stable rest period*?
 
 Procedure:
 We attempted 3 times taking 3 different rest periods. 
-Attemp1: Take the first exercise, relax 30 seconds. 
+Attempt1: Take the first exercise, relax 30 seconds. 
 
 Attempt2: Take all the time before the first contraction. Means when the device started recording, we get rest data, until the subject start to contract.
 
@@ -311,15 +358,7 @@ After taking out the average pressure values for each sensor, all these 3 trials
 However, the 3rd attempt gave the most reliable initial value(closest to 0), so we will be using this approach for all subjects.
 
 See R code below:
-#### CHAPTER NAME: SHOW ME THE CHANGE 
-###### A function to mutate a pressure `change` column
-```{r}
-baseline = function(relaxdata){
-  newdata = sweep(data[-1], 2, colMeans(relaxdata[-1]))
-  newdata$rectime = data$rectime
-  newdata
-}
-```
+#### CHAPTER NAME: SHOW ME THE CHANGE FROM 0
 
 
 ##### Attempt1 - If we just take the first exercise (relax 30 seconds)
