@@ -360,6 +360,14 @@ However, the 3rd attempt gave the most reliable initial value(closest to 0), so 
 See R code below:
 #### CHAPTER NAME: SHOW ME THE CHANGE FROM 0
 
+###### A function to mutate a pressure `change` column
+```{r}
+baseline = function(data, relaxdata){
+  newdata = sweep(data[-1], 2, colMeans(relaxdata[-1]))
+  newdata$rectime = data$rectime
+  newdata
+}
+```
 
 ##### Attempt1 - If we just take the first exercise (relax 30 seconds)
 ```{r}
@@ -372,8 +380,9 @@ relaxdata = getsubdata(data, rectime[[1]], rectime[[2]])
 # Plot the relax data so that we can compare
 (relax_plot = plot(relaxdata, name))
 
-# Lets call the function and have a look at the change for the while session
-newdata = baseline(relaxdata) 
+# Lets call the function to rip off baseline values,
+# and have a look at the change for the while session
+newdata = baseline(data, relaxdata) 
 
 plot(newdata[(1:(nrow(newdata) - 500)), ]) + labs(title = "Pressure change during the whole session")
 
@@ -402,7 +411,7 @@ rectime = getrectime("pfmc")
 attempt2 = getsubdata(data, 40, rectime[[1]] + 15000)
 plot(attempt2) + labs(title = "Pressure change from the begining to the first contraction")
 
-newdata = baseline(attempt2)
+newdata = baseline(data, attempt2)
 
 # Subset the pfmc data
 pfmcchange = getsubdata(newdata, rectime[[1]], rectime[[2]])
@@ -416,7 +425,7 @@ rectime = getrectime("pfmc")
 attempt3 = getsubdata(data, rectime[[1]], rectime[[1]] + 15000)
 plot(attempt3, name = "pfmc") + labs(subtitle = "Pressure change during the first 15s resting time")
 
-newdata = baseline(attempt3)
+newdata = baseline(data, attempt3)
 
 # Subset the pfmc data
 pfmcchange = getsubdata(newdata, rectime[[1]], rectime[[2]])
@@ -424,31 +433,6 @@ pfmcchange = getsubdata(newdata, rectime[[1]], rectime[[2]])
 plot(pfmcchange, name)
 ```
 
-
-
-###### ------------------Lets explore the peaks ------------------------######
-```{r}
-
-```
-
-
-
-18/12/2019
-Suggestion :
-Principal component analysis (PCA)
-changepoints (package)
-findpeaks (function)
-
-
-
-
-plot(pSignal)
-
-x = findpeaks(pSignal, npeaks=5, threshold=4)
-points(x, pSignal[x], pch=20, col="red")
-
-install.packages('changepoint')
-library(changepoint)
 
 
 
