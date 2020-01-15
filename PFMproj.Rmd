@@ -40,7 +40,8 @@ library(rjson)
 library(quantmod)
 ```
 
- ------------------- For all data -----------------------------
+------------------- For all data -----------------------------
+===============================  Helper functions ==============  
 
 ###### A function that tidys up a given dataset
 ```{r}
@@ -51,22 +52,6 @@ tidy = function(data){
 }
 ```
 
-
-=== Question 2. 
-    How do we enlarge the graph to get a clearer vision, hence better for investigation.
-
-=== Guess answer and trial attempts: 
-    Change axis setting, limits, log x axis? Change graph format, margins?
-    
-=== Answer ===
-    We can plot the pressure change for a shorter amount of time, due to the size of our dataset.
-    Additionally, we are more interested in pressure change when each contraction happens.
-    A fair amount of unwanted data exists so we need subsetting.
-    
--------------------------------------------- COMMENT -----------------------------------------
-Above we plot the whole thing, which is unnecessary. Now we need to find the starting and ending timestamp for each contraction. Then subset our data to get a smaller(more detailed) graph.
-
-===============================  Helper functions ==============  
 
 ###### A function to obtain all available exercise ids (as a list)
 ```{r}
