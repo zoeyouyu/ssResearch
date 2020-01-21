@@ -1,5 +1,5 @@
 ---
-title: "Normality Check"
+title: "Normality Check and Pre/Post significance test"
 author: "Zoe Zhou"
 date: "21/01/2020"
 output: html_document
@@ -9,14 +9,14 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-###### Read in data
+### Read in data
 ```{r}
 library(readxl)
 supine <- read_excel("PeakPFMCCompare.xlsx", sheet = "Supine")
 upright <- read_excel("PeakPFMCCompare.xlsx", sheet = "Upright")
 ```
 
-###### Have a look of the distribution of Supine data (PreSup)
+### Have a look of the distribution of Supine data (PreSup)
 ```{r}
 # Supine dataset
 # Density plot for presup
@@ -34,15 +34,15 @@ ggqqplot(supine$PreSup)
 qqnorm(supine$PreSup)
 ```
 
-###### Shapiro-Wilk’s test
+### Shapiro-Wilk’s test
 ```{r}
 shapiro.test(supine$PreSup)
 ```
-###### Comment
+### Comment
 P-value of 0.004 suggests we have strong evidence against normality. We might have skewed data.
 Sample size of 17 (< 30), the test statistics might not be useful.
 
-###### Have a look of the distribution of Supine data (PostSup)
+### Have a look of the distribution of Supine data (PostSup)
 ```{r}
 # Density plot for postsup
 hist(supine$PostSup, probability = TRUE, main = "Histogram of supine data (PostSup)")
@@ -53,15 +53,15 @@ ggqqplot(supine$PostSup)
 qqnorm(supine$PostSup)
 ```
 
-###### Shapiro-Wilk’s test
+### Shapiro-Wilk’s test
 ```{r}
 shapiro.test(supine$PostSup)
 ```
-###### Comment
+### Comment
 P-value of 0.008 suggests we have strong evidence against normality. We might have skewed data.
 Sample size of 17 (< 30), the test statistics might not be useful.
 
-###### Have a look of the Pre/Post differences for Supine data
+
 ```{r}
 library(tidyverse)
 tidysupine = supine %>% 
@@ -70,11 +70,11 @@ tidysupine = supine %>%
 
 
 qplot(x = tidysupine$id, y = tidysupine$peakvalue, color = tidysupine$group,
-      xlab = "id", ylab = "peak values", main = "Peak values differences") + 
+      xlab = "id", ylab = "peak values", main = "Peak values differences for supine data") + 
   scale_color_discrete(name = "")
 ```
 
-###### Have a look of the distribution of Upright data (PreUp)
+### Have a look of the distribution of Upright data (PreUp)
 ```{r}
 # Upright dataset
 # Density plots for preup
@@ -90,16 +90,16 @@ qqnorm(upright$PreUp)
 ```
 
 
-###### Shapiro-Wilk’s test
+### Shapiro-Wilk’s test
 ```{r}
 shapiro.test(upright$PreUp)
 ```
-###### Comment
+### Comment
 P-value of 0.2375 suggests no much evidence against normality. We might have normal distributed data.
 Sample size of 14 (< 30), the test statistics might not be useful.
 
 
-###### Have a look of the distribution of Upright data (PostUp)
+### Have a look of the distribution of Upright data (PostUp)
 ```{r}
 # Density plot for postup
 hist(upright$PostUp, probability = TRUE, main = "Histogram of upright data (PostUp)")
@@ -113,16 +113,15 @@ ggqqplot(upright$PostUp)
 qqnorm(upright$PostUp)
 ```
 
-###### Shapiro-Wilk’s test
+### Shapiro-Wilk’s test
 ```{r}
 # Shapiro-Wilk’s test
 shapiro.test(upright$PostUp)
 ```
-###### Comment
+### Comment
 P-value of 0.04537 suggests we have strong evidence against normality. We might have skewed data.
 Sample size of 14 (< 30), the test statistics might not be useful.
 
-###### Have a look of the Pre/Post differences for Supine data
 ```{r}
 tidyupright = upright %>% 
   mutate(id = 1:nrow(upright)) %>%
@@ -136,37 +135,42 @@ meantbl = tidyupright %>%
 tidyupright$rank = rep(order(order(meantbl$meanpeak)), 2)
 
 qplot(x = tidyupright$rank, y = tidyupright$peakvalue, 
-      color = tidyupright$group, xlab = "id", ylab = "peak values") + 
+      color = tidyupright$group, xlab = "id", ylab = "peak values",
+      main = "Peak value differences for Upright data") + 
   scale_color_discrete(name = "")
 ```
 
-
-
+### Wilcoxon signed-rank Test on Supine data
 ```{r}
+wilcox.test(peakvalue ~ group, data = tidysupine, paired = TRUE)
+```
+### Comment
+The p-value of the test is 1.526e-05(<0.05). We can conclude that the median peak values of the patients before treatment is significantly different from the median peak values after treatment.
 
+#### Plot the data side by side
+```{r}
+library("ggpubr")
+ggboxplot(tidysupine, x = "group", y = "peakvalue", 
+          color = "group", ylab = "Peak value", xlab = "Groups")
 ```
 
 
 
 
+### Are the Pre/Post differences significant?
 
+### Wilcoxon signed-rank Test on Upright data
+```{r}
+wilcox.test(peakvalue ~ group, data = tidyupright, paired = TRUE)
+```
+### Comment
+The p-value of the test is 0.006714. There is only some evidence against the null hypothesis(H0 = no significant difference). We cannot make any conclusions due to the lack of evidence.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#### Plot the data side by side
+```{r}
+ggboxplot(tidyupright, x = "group", y = "peakvalue", 
+          color = "group", ylab = "Peak value", xlab = "Groups")
+```
 
 
 
