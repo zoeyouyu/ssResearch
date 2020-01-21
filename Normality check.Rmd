@@ -1,0 +1,176 @@
+---
+title: "Normality Check"
+author: "Zoe Zhou"
+date: "21/01/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###### Read in data
+```{r}
+library(readxl)
+supine <- read_excel("PeakPFMCCompare.xlsx", sheet = "Supine")
+upright <- read_excel("PeakPFMCCompare.xlsx", sheet = "Upright")
+```
+
+###### Have a look of the distribution of Supine data (PreSup)
+```{r}
+# Supine dataset
+# Density plot for presup
+hist(supine$PreSup, probability = TRUE, 
+     main = "Histogram of supine data (PreSup)")
+lines(density(supine$PreSup),col = 2)
+```
+
+
+```{r}
+# QQ plot
+library(ggpubr)
+ggqqplot(supine$PreSup)
+
+qqnorm(supine$PreSup)
+```
+
+###### Shapiro-Wilk’s test
+```{r}
+shapiro.test(supine$PreSup)
+```
+###### Comment
+P-value of 0.004 suggests we have strong evidence against normality. We might have skewed data.
+Sample size of 17 (< 30), the test statistics might not be useful.
+
+###### Have a look of the distribution of Supine data (PostSup)
+```{r}
+# Density plot for postsup
+hist(supine$PostSup, probability = TRUE, main = "Histogram of supine data (PostSup)")
+lines(density(supine$PostSup), col = 2)
+
+# QQ plot
+ggqqplot(supine$PostSup)
+qqnorm(supine$PostSup)
+```
+
+###### Shapiro-Wilk’s test
+```{r}
+shapiro.test(supine$PostSup)
+```
+###### Comment
+P-value of 0.008 suggests we have strong evidence against normality. We might have skewed data.
+Sample size of 17 (< 30), the test statistics might not be useful.
+
+###### Have a look of the Pre/Post differences for Supine data
+```{r}
+library(tidyverse)
+tidysupine = supine %>% 
+  mutate(id = 1:nrow(supine)) %>%
+  gather(group, peakvalue, c(PreSup, PostSup))
+
+
+qplot(x = tidysupine$id, y = tidysupine$peakvalue, color = tidysupine$group,
+      xlab = "id", ylab = "peak values", main = "Peak values differences") + 
+  scale_color_discrete(name = "")
+```
+
+###### Have a look of the distribution of Upright data (PreUp)
+```{r}
+# Upright dataset
+# Density plots for preup
+hist(upright$PreUp, probability = TRUE, main = "Histogram of upright data (PreUp)")
+lines(density(upright$PreUp), col = 2)
+```
+
+
+```{r}
+# QQ plot
+ggqqplot(upright$PreUp)
+qqnorm(upright$PreUp)
+```
+
+
+###### Shapiro-Wilk’s test
+```{r}
+shapiro.test(upright$PreUp)
+```
+###### Comment
+P-value of 0.2375 suggests no much evidence against normality. We might have normal distributed data.
+Sample size of 14 (< 30), the test statistics might not be useful.
+
+
+###### Have a look of the distribution of Upright data (PostUp)
+```{r}
+# Density plot for postup
+hist(upright$PostUp, probability = TRUE, main = "Histogram of upright data (PostUp)")
+lines(density(upright$PostUp), col = 2)
+```
+
+
+```{r}
+# QQ plot
+ggqqplot(upright$PostUp)
+qqnorm(upright$PostUp)
+```
+
+###### Shapiro-Wilk’s test
+```{r}
+# Shapiro-Wilk’s test
+shapiro.test(upright$PostUp)
+```
+###### Comment
+P-value of 0.04537 suggests we have strong evidence against normality. We might have skewed data.
+Sample size of 14 (< 30), the test statistics might not be useful.
+
+###### Have a look of the Pre/Post differences for Supine data
+```{r}
+tidyupright = upright %>% 
+  mutate(id = 1:nrow(upright)) %>%
+  gather(group, peakvalue, c(PreUp, PostUp))
+
+# Order the data first
+meantbl = tidyupright %>% 
+  group_by(id) %>%
+  summarise(meanpeak = mean(peakvalue))
+
+tidyupright$rank = rep(order(order(meantbl$meanpeak)), 2)
+
+qplot(x = tidyupright$rank, y = tidyupright$peakvalue, 
+      color = tidyupright$group, xlab = "id", ylab = "peak values") + 
+  scale_color_discrete(name = "")
+```
+
+
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
