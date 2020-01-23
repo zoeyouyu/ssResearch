@@ -1,0 +1,109 @@
+```{r}
+localMaxima <- function(x) {
+  # Use -Inf instead if x is numeric (non-integer)
+  y <- diff(c(-.Machine$integer.max, x)) > 0L
+  rle(y)$lengths
+  y <- cumsum(rle(y)$lengths)
+  y <- y[seq.int(1L, length(y), 2L)]
+  if (x[[1]] == x[[2]]) {
+    y <- y[-1]
+  }
+  y
+}
+
+
+which.peaks <- function(x,partial=TRUE, decreasing = FALSE){
+  if (decreasing){
+    if (partial){
+      which(diff(c(FALSE,diff(x)>0,TRUE))>0)
+    }else {
+      which(diff(diff(x)>0)>0)+1
+    }
+  }else {
+    if (partial){
+      which(diff(c(TRUE,diff(x)>=0,FALSE))<0)
+    }else {
+      which(diff(diff(x)>=0)<0)+1
+    }
+  }
+}
+
+inflect <- function(x, threshold = 1){
+  up   <- sapply(1:threshold, function(n) c(x[-(seq(n))], rep(NA, n)))
+  down <-  sapply(-1:-threshold, function(n) c(rep(NA,abs(n)), x[-seq(length(x), length(x) - abs(n) + 1)]))
+  a    <- cbind(x,up,down)
+  list(minima = which(apply(a, 1, min) == a[,1]), maxima = which(apply(a, 1, max) == a[,1]))
+}
+
+
+# For sensor 1, color the peaks using different functions
+pfmc1.1$id = 1:nrow(pfmc1.1)
+peaks_p1 = localMaxima(pfmc1.1$p1)
+peaks2_p1 = which.peaks(pfmc1.1$p1)
+
+
+plot(pfmc1.1$p1, type = "l")
+points(peaks_p1, pfmc1.1[peaks_p1, "p1"], pch = 20, col = "red")
+points(peaks2_p1, pfmc1.1[peaks2_p1, "p1"], pch = 20, col = "blue")
+```
+
+
+```{r}
+ggplot(data = pfmc1.1, aes(x = id, y = p1)) + 
+  geom_line() + 
+  stat_peaks(col = "red") + 
+  stat_valleys(col = "green")
+```
+
+
+
+
+```{r}
+# Can I set a threshold?
+peaks3_p1 = findpeaks(pfmc1.1$p1, minpeakheight = 1, minpeakdistance = 500, npeaks = 3)
+plot(pfmc1.1$p1, type = "l")
+points(peaks3_p1[, 2], peaks3_p1[, 1], pch = 15, col = "red")
+```
+
+
+```{r}
+peaks3_p2 = findpeaks(pfmc1.1$p2,  minpeakheight = 1, minpeakdistance = 500, npeaks = 3)
+plot(pfmc1.1$p2, type = "l")
+points(peaks3_p2[, 2], peaks3_p2[, 1], pch = 15, col = "red")
+```
+
+
+```{r}
+plot(pfmc1.1$p3, type = "l")
+peaks3_p3 = findpeaks(pfmc1.1$p3, minpeakheight = 1, minpeakdistance = 500, npeaks = 3)
+points(peaks3_p3[, 2], peaks3_p3[, 1], pch = 15, col = "red")
+```
+
+
+```{r}
+# For all
+data = tidy(pfmc1.1)
+g = ggplot(aes(x = id, y = pressure), data = data) + geom_line()
+```
+
+
+
+### Get change points
+```{r}
+library(changepoint)
+cpt.mean()
+
+````
+
+
+
+
+
+
+
+
+
+
+
+
+
