@@ -9,9 +9,31 @@ tidy = function(data){
     mutate(sensor = as.factor(sensor))
 }
 
+####### A function that return JSON information
+get.json.info = function(folder) {
+  # Get the session json of this subject
+  session = fromJSON(file = list.files(path = folder, pattern = "session.json", recursive = TRUE, full.names = TRUE))
+  
+  # Get the profile json file, so we have information about the exercises
+  profile = fromJSON(file = list.files(path = folder, pattern = "profile", recursive = TRUE, full.names = TRUE))
+  # or pattern = ".+(_)+.+.json"
+  
+  exercise_list = profile$exercise_groups[[1]]$exercises
+  
+  # return all
+  json.info.list = list(session = session, 
+                        profile = profile, 
+                        exercise_list = exercise_list)
+  
+  json.info.list
+}
+
 
 ###### A function to obtain all available exercise ids (as a list)
-get_id_list = function(){
+get_id_list = function(folder){
+  # Get the exercise list
+  exercise_list = get.json.info(folder)$exercise_list
+  
   # Get the exercise list length
   N = length(exercise_list)
   
@@ -30,22 +52,28 @@ get_id_list = function(){
 
 ###### A function that obtain the description for a rough input exercise name (id)
 get_description = function(id){
-  id_list = get_id_list()
+  # Choose a random(the first one) folder in the current wd
+  folder = list.files(pattern = "_csv")[1]
   
+  id_list = get_id_list(folder)
+
   # Get the exercise order in the list
   id_order = grep(id, id_list)
-  
+
   if (length(id_order) == 0) {
     description = NULL
   } else {
+
+    # Get the exercise list
+    exercise_list = get.json.info(folder)$exercise_list
     
     # Get the exercise
     exercise_list[[id_order]]
-    
+
     # Get the description
     description = exercise_list[[id_order]]$activity
   }
-  
+
   description
 }
 
@@ -54,16 +82,8 @@ get_description = function(id){
 
 ###### A function of extracting start/stop time for a given exercise
 # (modified from the individual subject s0007 version)
-getrectime = function(folder, exercise){
-  # Get the session json of this subject
-  session = fromJSON(file = list.files(path = folder, pattern = "session.json", recursive = TRUE, full.names = TRUE))
-  
-  # Get the profile json file, so we have information about the exercises
-  profile = fromJSON(file = list.files(path = folder, pattern = "profile", recursive = TRUE, full.names = TRUE))
-  # or pattern = ".+(_)+.+.json"
-  
-  exercise_list = profile$exercise_groups[[1]]$exercises
-  
+getrectime = function(folder, exercise, session, profile){
+
   # Get the starting time from recordings
   rec = session$recordings
   start = rec[[1]]$start
@@ -98,15 +118,17 @@ getsubdata = function(data, start, stop){
 }
 
 
-###### A function plot pressure values vs time (in seconds), where the time variable is indicating how long after the this exercise has begun
 
-myplot = function(exercisedata, name = NULL){
+
+###### A function plot pressure values vs time (in seconds), 
+###### where the time variable is indicating how long after the this exercise has begun
+myplot = function(data, name = NULL){
   # mutate a new time variable 
   # by subtract the recoring time varibale by its starting time (minimal value)
   # Note, there are some missingness
-  exercisedata$time = exercisedata$rectime - min(exercisedata$rectime)
+  data$time = data$rectime - min(data$rectime)
   
-  timelength = max(exercisedata$time)
+  timelength = max(data$time)
   
   # Default time gap is 1s
   gap = 1000
@@ -122,18 +144,18 @@ myplot = function(exercisedata, name = NULL){
   
   if (is.null(name) == TRUE) {
     description = NULL
-  } 
-  
-  else {
-    description = paste("Instruction:", get_description(name)) 
   }
   
-  exercisedata %>% 
+  else {
+    description = paste("Instruction:", get_description(name))
+  }
+
+  data %>% 
     tidy() %>%
     ggplot(aes(x = time, y = pressure, color = sensor)) +
     geom_line(position = position_dodge(width = 0.2)) +
-    scale_x_discrete(limits = seq(0, round(max(exercisedata$time)/1000) * 1000, gap), 
-                     labels = seq(0, round(max(exercisedata$time)/1000), gap/1000)) +
+    scale_x_discrete(limits = seq(0, round(max(data$time)/1000) * 1000, gap), 
+                     labels = seq(0, round(max(data$time)/1000), gap/1000)) +
     labs(x = "Time (in s)", y = "Pressure (in mm Hg)",
          title = paste("Pressure change during the exercise", name),
          caption = description) +
@@ -145,13 +167,13 @@ myplot = function(exercisedata, name = NULL){
 
 #### Not so useful but exist 
 ###### A function plot the pressure change vs rectime (in ms) (rectime is the original recording time variable in data)
-plot2 = function(exercisedata, name = NULL){
+plot2 = function(data, name = NULL){
   if (is.null(name) == TRUE) 
   {description = NULL} 
   else 
   {description = paste("Instruction:", get_description(name))}
   
-  exercisedata %>% 
+  data %>% 
     tidy() %>%
     ggplot(aes(x = rectime, y = pressure, 
                group = sensor, color = sensor)) +
@@ -174,31 +196,24 @@ baseline = function(data, relaxdata){
 }
 
 
-
-###### A run-everything process function - return the pfmc datasets
+###### A run-everything process function - return the a list of 2 pfmc datasets (1 original, 1 change)
 process = function(folder){
   # Get the data
   whole = read.csv(list.files(path = folder, pattern = ".csv", recursive = TRUE, full.names = TRUE))
   
-  # Get the session json of this subject
-  # session = fromJSON(file = list.files(path = folder, pattern = "session.json", recursive = TRUE, full.names = TRUE))
-  
-  # Get the profile json file, so we have information about the exercises
-  # profile = fromJSON(file = list.files(path = folder, pattern = "profile", recursive = TRUE, full.names = TRUE))
-  # or pattern = ".+(_)+.+.json"
-  
-  # exercise_list = profile$exercise_groups[[1]]$exercises
+  # Get the json info of this subject
+  json.info.list = get.json.info(folder)
+  session = json.info.list$session
+  profile = json.info.list$profile
   
   # Rename columns
   colnames(whole) = c("rectime", paste0("p", 1:8), paste0("t", 1:8))
   
   data = whole %>% select(-(t1:t8))
-  
-  #list(plot(pfmcdata), plot2(pfmcdata))
-  
+
   # Get the start/end time of the pfmc exercise
   name = "pfmc"
-  rectime = getrectime(folder, name)
+  rectime = getrectime(folder, name, session, profile)
   
   # Get pfmc data
   pfmcdata = getsubdata(data, rectime[[1]], rectime[[2]])
@@ -216,7 +231,6 @@ process = function(folder){
   list(pfmcdata, pfmcchange)
   
 }
-
 
 
 
