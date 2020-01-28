@@ -1,99 +1,165 @@
+
+### Start to explore just the PFMC pressure change (baseline removed) for subject s0007
 ```{r}
-localMaxima <- function(x) {
-  # Use -Inf instead if x is numeric (non-integer)
-  y <- diff(c(-.Machine$integer.max, x)) > 0L
-  rle(y)$lengths
-  y <- cumsum(rle(y)$lengths)
-  y <- y[seq.int(1L, length(y), 2L)]
-  if (x[[1]] == x[[2]]) {
-    y <- y[-1]
-  }
-  y
-}
+source(file = "Functions.R")
+data_folders = list.files(pattern = "_csv")
+folder = data_folders[1]
+s0007data = process(folder)
 
-
-which.peaks <- function(x,partial=TRUE, decreasing = FALSE){
-  if (decreasing){
-    if (partial){
-      which(diff(c(FALSE,diff(x)>0,TRUE))>0)
-    }else {
-      which(diff(diff(x)>0)>0)+1
-    }
-  }else {
-    if (partial){
-      which(diff(c(TRUE,diff(x)>=0,FALSE))<0)
-    }else {
-      which(diff(diff(x)>=0)<0)+1
-    }
-  }
-}
-
-inflect <- function(x, threshold = 1){
-  up   <- sapply(1:threshold, function(n) c(x[-(seq(n))], rep(NA, n)))
-  down <-  sapply(-1:-threshold, function(n) c(rep(NA,abs(n)), x[-seq(length(x), length(x) - abs(n) + 1)]))
-  a    <- cbind(x,up,down)
-  list(minima = which(apply(a, 1, min) == a[,1]), maxima = which(apply(a, 1, max) == a[,1]))
-}
-
-
-# For sensor 1, color the peaks using different functions
-pfmc1.1$id = 1:nrow(pfmc1.1)
-peaks_p1 = localMaxima(pfmc1.1$p1)
-peaks2_p1 = which.peaks(pfmc1.1$p1)
-
-
-plot(pfmc1.1$p1, type = "l")
-points(peaks_p1, pfmc1.1[peaks_p1, "p1"], pch = 20, col = "red")
-points(peaks2_p1, pfmc1.1[peaks2_p1, "p1"], pch = 20, col = "blue")
+data = s0007data[[2]]
+data$id = 1:nrow(data)
 ```
 
-
+### Let's have a look at sensor 1 traces and its peaks
 ```{r}
-ggplot(data = pfmc1.1, aes(x = id, y = p1)) + 
-  geom_line() + 
-  stat_peaks(col = "red") + 
-  stat_valleys(col = "green")
+library(pracma)
+# Set the minimal peak distance to be 100 data points (1 second apart) reference Nadia M. Hamad, 2013
+# Set the minimal peak height to be 1 mmHg
+peaks_p1 = findpeaks(data$p1,  minpeakheight = 1, minpeakdistance = 100)
+plot(data$p1, type = "l")
+points(peaks_p1[, 2], peaks_p1[, 1], pch = 15, col = "red")
+```
+
+#### Can I set a good threshold?
+```{r}
+top_3_peaks_p1 = findpeaks(data$p1, minpeakdistance = 500, npeaks = 3)
+top_3_peaks_indices_p1 = top_3_peaks_p1[, 2]
+plot(data$p1, type = "l")
+points(top_3_peaks_p1[, 2], top_3_peaks_p1[, 1], pch = 15, col = "red")
+text(top_3_peaks_p1[, 2] + 250, top_3_peaks_p1[, 1], as.character(top_3_peaks_p1[, 2]))
+```
+
+### Get 3 change points(timestamp) for sensor 1
+```{r}
+library(changepoint)
+
+(p1.binseg = cpt.mean(data$p1, method = "BinSeg", Q = 6))
+best.fit.cpts = cpts(p1.binseg)
+
+plot(p1.binseg)
 ```
 
 
 
-
 ```{r}
-# Can I set a threshold?
-peaks3_p1 = findpeaks(pfmc1.1$p1, minpeakheight = 1, minpeakdistance = 500, npeaks = 3)
-plot(pfmc1.1$p1, type = "l")
-points(peaks3_p1[, 2], peaks3_p1[, 1], pch = 15, col = "red")
+best.fit.cpts
+```
+
+### Comment: After attempts on the whole dataset, we found that change point function worked pretty well for sensor 1, but not really for other sensors. The parameters are not consistent.
+### Decide to stick to section each peaks method.
+
+### Segment1 is from id 1 to first peak. Return the peak start point. (point 1)
+```{r}
+seg1.test = cpt.mean(data[1:top_3_peaks_indices_p1[1], "p1"])
+point1 = cpts(seg1.test)
+plot(seg1.test)
+text(cpts(seg1.test), 0, cpts(seg1.test), font = 2)
+```
+### Segment2 is from point1 to second peak. Return the fisrt peak end point. (point 2)
+
+#### Need to change the x axis
+```{r}
+seg2.test = cpt.mean(data[point1:top_3_peaks_indices_p1[2], "p1"])
+point2 = cpts(seg1.test) + cpts(seg2.test)
+plot(seg2.test)
+text(cpts(seg2.test), 0, point2, font = 2)
+```
+### Segment3 is from point2 to second peak. Return the second peak start point. (point 3)
+
+#### Need to change the x axis
+```{r}
+seg3.test = cpt.mean(data[point2:top_3_peaks_indices_p1[2], "p1"])
+point3 = point2 + cpts(seg3.test)
+plot(seg3.test)
+text(cpts(seg3.test), -0.5, point3, font = 2)
+```
+
+### Segment4 is from point3 to third peak. Return the second peak end point. (point 4)
+
+#### Need to change the x axis
+```{r}
+seg4.test = cpt.mean(data[point3:top_3_peaks_indices_p1[3], "p1"])
+point4 = point3 + cpts(seg4.test)
+plot(seg4.test)
+text(cpts(seg4.test), 0, point4, font = 2)
+```
+
+### Segment5 is from point4 to third peak. Return the third peak start point. (point 5)
+
+#### Need to change the x axis
+```{r}
+seg5.test = cpt.mean(data[point4:top_3_peaks_indices_p1[3], "p1"])
+point5 = point4 + cpts(seg5.test)
+plot(seg5.test)
+text(cpts(seg5.test), 0.5, point5, font = 2)
+```
+
+### Segment6 is from point5 to the end. Return the third peak end point. (point 6)
+
+#### Need to change the x axis
+```{r}
+seg6.test = cpt.mean(data[point5:nrow(data), "p1"])
+point6 = point5 + cpts(seg6.test)
+plot(seg6.test)
+text(cpts(seg6.test), 0.5, point6, font = 2)
 ```
 
 
+
+
+### For sensor 2, GET THE TOP 3 PEAKS
 ```{r}
-peaks3_p2 = findpeaks(pfmc1.1$p2,  minpeakheight = 1, minpeakdistance = 500, npeaks = 3)
-plot(pfmc1.1$p2, type = "l")
-points(peaks3_p2[, 2], peaks3_p2[, 1], pch = 15, col = "red")
+top_3_peaks_p2 = findpeaks(data$p2,  minpeakheight = 1, minpeakdistance = 500, npeaks = 3)
+plot(data$p2, type = "l")
+points(top_3_peaks_p2[, 2], top_3_peaks_p2[, 1], pch = 15, col = "red")
+text(top_3_peaks_p2[, 2] + 250, top_3_peaks_p2[, 1], as.character(top_3_peaks_p2[, 2]))
+```
+```{r}
+(cpt.test2 = cpt.mean(data$p2, method = "BinSeg", minseglen = 1000, Q = 7))
+
+cpoints.sensor2 = cpts(cpt.test2)
+
+plot(cpt.test2)
 ```
 
+### For sensor 3
 
 ```{r}
-plot(pfmc1.1$p3, type = "l")
-peaks3_p3 = findpeaks(pfmc1.1$p3, minpeakheight = 1, minpeakdistance = 500, npeaks = 3)
+plot(data$p3, type = "l")
+peaks3_p3 = findpeaks(data$p3, minpeakheight = 1, minpeakdistance = 500, npeaks = 3)
 points(peaks3_p3[, 2], peaks3_p3[, 1], pch = 15, col = "red")
 ```
 
-
 ```{r}
-# For all
-data = tidy(pfmc1.1)
-g = ggplot(aes(x = id, y = pressure), data = data) + geom_line()
+(cpt.test3 = cpt.mean(data$p3, method = "BinSeg", Q = 6))
+cpoints = cpts(cpt.test3)
+
+plot(cpt.test3)
 ```
 
 
 
-### Get change points
-```{r}
-library(changepoint)
-cpt.mean()
 
-````
+# For all datasets (8 sensors)
+```{r}
+data.matrix = as.matrix(t(data[-9:-10]))
+```
+
+
+```{r}
+test.all = cpt.mean(data.matrix,  method = "BinSeg", Q = 7, minseglen = 700)
+
+lapply(test.all, cpts)
+```
+
+
+### Comment: Smooth the data out, reduce the effect of the noise.
+
+```{r}
+data
+```
+
+
 
 
 
