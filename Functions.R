@@ -56,7 +56,11 @@ get_description = function(id){
   folder = list.files(pattern = "_csv")[1]
   
   id_list = get_id_list(folder)
-
+  
+  # Get rid of info after "."
+  id = strsplit(id, "\\.")[[1]][1]
+  id = gsub("data|change", "", id)
+  
   # Get the exercise order in the list
   id_order = grep(id, id_list)
 
@@ -149,6 +153,7 @@ myplot = function(data, name = NULL){
   else {
     description = paste("Instruction:", get_description(name))
   }
+  
 
   data %>% 
     tidy() %>%
@@ -157,7 +162,7 @@ myplot = function(data, name = NULL){
     scale_x_discrete(limits = seq(0, round(max(data$time)/1000) * 1000, gap), 
                      labels = seq(0, round(max(data$time)/1000), gap/1000)) +
     labs(x = "Time (in s)", y = "Pressure (in mm Hg)",
-         title = paste("Pressure change during the exercise", name),
+         title = paste("Pressure trace from", name),
          caption = description) +
     scale_color_brewer(palette = "Set1") + 
     guides(color = guide_legend(override.aes = list(size = 5)))
@@ -206,6 +211,9 @@ process = function(folder){
   session = json.info.list$session
   profile = json.info.list$profile
   
+  # Get patient id
+  patient_id = json.info.list$session$patient_id
+  
   # Rename columns
   colnames(whole) = c("rectime", paste0("p", 1:8), paste0("t", 1:8))
   
@@ -218,6 +226,7 @@ process = function(folder){
   # Get pfmc data
   pfmcdata = getsubdata(data, rectime[[1]], rectime[[2]])
   
+ 
   # Get the resting period - stable data
   attempt3 = getsubdata(data, rectime[[1]], rectime[[1]] + 15000)
   
@@ -228,7 +237,12 @@ process = function(folder){
   pfmcchange = getsubdata(newdata, rectime[[1]], rectime[[2]])
   
   # Retutn pfmc dataset, one original, one change
-  list(pfmcdata, pfmcchange)
+  datalist = list(pfmcdata, pfmcchange)
+  
+  names(datalist) = c(paste0("pfmcdata.patient", patient_id), 
+                      paste0("pfmcchange.patient", patient_id))
+  
+  datalist
   
 }
 
