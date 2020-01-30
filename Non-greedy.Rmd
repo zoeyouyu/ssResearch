@@ -1,0 +1,83 @@
+### Non-greedy (Patience is virtue) method ###
+#### Segment1 is from the start to the 1st peak. Return the 1st peak start point. (point 1)
+```{r}
+seg1.test = cpt.mean(data[1:top_3_peaks_indices_p1[1], "p1"])
+point1 = cpts(seg1.test)
+plot(seg1.test)
+text(cpts(seg1.test), 0, cpts(seg1.test), font = 2)
+```
+#### Segment2 is from point1 to the 2nd peak. Return the 1st peak end point. (point 2)
+
+#### Need to change the x axis
+```{r}
+seg2.test = cpt.mean(data[point1:top_3_peaks_indices_p1[2], "p1"])
+point2 = cpts(seg1.test) + cpts(seg2.test)
+plot(seg2.test)
+text(cpts(seg2.test), 0, point2, font = 2)
+```
+#### Segment3 is from point2 to 2nd peak. Return the 2nd peak start point. (point 3)
+
+#### Need to change the x axis
+```{r}
+seg3.test = cpt.mean(data[point2:top_3_peaks_indices_p1[2], "p1"])
+point3 = point2 + cpts(seg3.test)
+plot(seg3.test)
+text(cpts(seg3.test), -0.5, point3, font = 2)
+```
+
+#### Segment4 is from point3 to 3rd peak. Return the 2nd peak end point. (point 4)
+
+#### Need to change the x axis
+```{r}
+seg4.test = cpt.mean(data[point3:top_3_peaks_indices_p1[3], "p1"])
+point4 = point3 + cpts(seg4.test)
+plot(seg4.test)
+text(cpts(seg4.test), 0, point4, font = 2)
+```
+
+#### Segment5 is from point4 to 3rd peak. Return the 3rd peak start point. (point 5)
+
+#### Need to change the x axis
+```{r}
+seg5.test = cpt.mean(data[point4:top_3_peaks_indices_p1[3], "p1"])
+point5 = point4 + cpts(seg5.test)
+plot(seg5.test)
+text(cpts(seg5.test), 0.5, point5, font = 2)
+```
+
+#### Segment6 is from point5 to the end. Return the 3rd peak end point. (point 6)
+
+#### Need to change the x axis
+```{r}
+seg6.test = cpt.mean(data[point5:nrow(data), "p1"])
+point6 = point5 + cpts(seg6.test)
+plot(seg6.test)
+text(cpts(seg6.test), 0.5, point6, font = 2)
+```
+
+
+################## Automate the process ##################
+####### Approach 1 - create a big data matrix of 6 rows, each row is a sub dataset.
+
+#### Get the top 3 peaks first. 
+```{r}
+top_3_peaks = findpeaks(smoothed.df$pressure, minpeakdistance = 500, npeaks = 3)
+top_3_peaks_indices = top_3_peaks[, 2]
+plot(smoothed.df$pressure, type = "l")
+points(top_3_peaks[, 2], top_3_peaks[, 1], pch = 15, col = "red")
+text(top_3_peaks[, 2] + 250, top_3_peaks[, 1], as.character(top_3_peaks[, 2]))
+```
+
+Prepare the matrix:
+
+Row 1 - smoothed.df[1:top_3_peaks_indices[1], "pressure"]
+
+Row 2 - smoothed.df[point1:top_3_peaks_indices[2], "pressure"]
+
+Row 3 - smoothed.df[point2:top_3_peaks_indices[2], "pressure"]
+ 
+Row 4 - smoothed.df[point3:top_3_peaks_indices[3], "pressure"]
+
+Row 5 - smoothed.df[point4:top_3_peaks_indices[3], "pressure"]
+
+Row 6 - smoothed.df[point5:nrow(smoothed.df), "pressure"]
