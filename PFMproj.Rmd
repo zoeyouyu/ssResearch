@@ -317,6 +317,16 @@ source("Functions.R")
 # Get all pfmc data
 pfmcdatalist = lapply(data_folders, process)
 
+# Extract out all baseline removed data(called pfmcchange data)
+pfmcchange.df.list = list()
+for (i in 1:length(pfmcdatalist)) {
+  pfmcchange.df.list[[i]] = pfmcdatalist[[i]][[2]]
+  names(pfmcchange.df.list)[i] = names(pfmcdatalist[[i]])[2]
+}
+```
+
+### Visualize our data
+```{r}
 # Initialize empty lists to store all pfmc plots
 change.plots = list()
 pressure.plots = list()
@@ -347,7 +357,6 @@ invisible(mapply(ggsave, width = 10, height = 4, dpi = 300,
                  file = paste0(names(change.plots), ".png"), plot = change.plots))
 
 ```
-
 
 
 

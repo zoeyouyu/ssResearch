@@ -1,7 +1,7 @@
 library(tidyverse)
 library(rjson)
 library(quantmod)
-
+library(pracma)
 ###### A function that tidys up a given dataset
 tidy = function(data){
   data %>%
@@ -184,7 +184,7 @@ plot2 = function(data, name = NULL){
                group = sensor, color = sensor)) +
     geom_line(position = position_dodge(width = 0.2)) +
     labs(x = "Recording Time (in ms)", y = "Pressure (in mm Hg)",
-         title = paste("Pressure change during the excise of", name),
+         title = paste("Pressure trace from", name),
          caption = description) +   
     scale_color_brewer(palette = "Set1") + 
     guides(color = guide_legend(override.aes = list(size = 5)))

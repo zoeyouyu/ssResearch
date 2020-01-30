@@ -1,18 +1,25 @@
 
 ### Start to explore just the PFMC pressure change (baseline removed) for subject s0007
 ```{r}
-source(file = "Functions.R")
-data_folders = list.files(pattern = "_csv")
-folder = data_folders[1]
-s0007data = process(folder)
 
-data = s0007data[[2]]
+# Find all data folders
+data_folders = list.files(pattern = "_csv")
+
+# Folder that contains patient3 data s0007
+s0007.folder = data_folders[1]
+
+# Load in all the helper functions
+source("Functions.R")
+
+# Process folder and get the change dataset for patient 3
+data = process(s0007.folder)$pfmcchange.patient3
+
 data$id = 1:nrow(data)
 ```
 
-### Let's have a look at sensor 1 traces and its peaks
+## Validating methods - to find 6 change points
+#### Let's have a look at sensor 1 traces and its peaks
 ```{r}
-library(pracma)
 # Set the minimal peak distance to be 100 data points (1 second apart) reference Nadia M. Hamad, 2013
 # Set the minimal peak height to be 1 mmHg
 peaks_p1 = findpeaks(data$p1,  minpeakheight = 1, minpeakdistance = 100)
@@ -20,7 +27,7 @@ plot(data$p1, type = "l")
 points(peaks_p1[, 2], peaks_p1[, 1], pch = 15, col = "red")
 ```
 
-#### Can I set a good threshold?
+#### Can I set a good threshold to get the TOP 3 peaks (representing 3 contractions) for sensor 1?
 ```{r}
 top_3_peaks_p1 = findpeaks(data$p1, minpeakdistance = 500, npeaks = 3)
 top_3_peaks_indices_p1 = top_3_peaks_p1[, 2]
@@ -28,148 +35,175 @@ plot(data$p1, type = "l")
 points(top_3_peaks_p1[, 2], top_3_peaks_p1[, 1], pch = 15, col = "red")
 text(top_3_peaks_p1[, 2] + 250, top_3_peaks_p1[, 1], as.character(top_3_peaks_p1[, 2]))
 ```
+### Non-greedy (Patience is virtue) method ###
+```{r}
+source("get6points.R")
+get6points(data, "p1", top_3_peaks_indices_p1)
+```
 
-### Get 3 change points(timestamp) for sensor 1
+### Greedy method ###
+#### Trying to get the 6 change points(Each contraction's start/end timestamps) for sensor 1
 ```{r}
 library(changepoint)
 
 (p1.binseg = cpt.mean(data$p1, method = "BinSeg", Q = 6))
-best.fit.cpts = cpts(p1.binseg)
+greedy.fit.p1 = cpts(p1.binseg)
 
 plot(p1.binseg)
 ```
-
-
-
+#### Successfully found the 6 change points for sensor 1
 ```{r}
-best.fit.cpts
+greedy.fit.p1
 ```
 
-### Comment: After attempts on the whole dataset, we found that change point function worked pretty well for sensor 1, but not really for other sensors. The parameters are not consistent.
-### Decide to stick to section each peaks method.
-
-### Segment1 is from id 1 to first peak. Return the peak start point. (point 1)
+#### Trying to get the 6 change points for sensor 2
 ```{r}
-seg1.test = cpt.mean(data[1:top_3_peaks_indices_p1[1], "p1"])
-point1 = cpts(seg1.test)
-plot(seg1.test)
-text(cpts(seg1.test), 0, cpts(seg1.test), font = 2)
-```
-### Segment2 is from point1 to second peak. Return the fisrt peak end point. (point 2)
-
-#### Need to change the x axis
-```{r}
-seg2.test = cpt.mean(data[point1:top_3_peaks_indices_p1[2], "p1"])
-point2 = cpts(seg1.test) + cpts(seg2.test)
-plot(seg2.test)
-text(cpts(seg2.test), 0, point2, font = 2)
-```
-### Segment3 is from point2 to second peak. Return the second peak start point. (point 3)
-
-#### Need to change the x axis
-```{r}
-seg3.test = cpt.mean(data[point2:top_3_peaks_indices_p1[2], "p1"])
-point3 = point2 + cpts(seg3.test)
-plot(seg3.test)
-text(cpts(seg3.test), -0.5, point3, font = 2)
+(p2.binseg = cpt.mean(data$p2, method = "BinSeg", Q = 6, minseglen = 500))
+plot(p2.binseg)
 ```
 
-### Segment4 is from point3 to third peak. Return the second peak end point. (point 4)
-
-#### Need to change the x axis
+Not working so well due to the negative values at the start. Lets try remove that noise.
 ```{r}
-seg4.test = cpt.mean(data[point3:top_3_peaks_indices_p1[3], "p1"])
-point4 = point3 + cpts(seg4.test)
-plot(seg4.test)
-text(cpts(seg4.test), 0, point4, font = 2)
+(p2.binseg2 = cpt.mean(data[1000:nrow(data), "p2"], method = "BinSeg", Q = 6, minseglen = 700))
+plot(p2.binseg2)
+```
+Had to change the "minseglen" to get the perfect change points. Otherwise the function picks up noise around time 3500.
+
+
+#### Trying to get the 6 change points for sensor 3
+```{r}
+(p3.binseg = cpt.mean(data$p3, method = "BinSeg", Q = 6, minseglen = 700))
+plot(p3.binseg)
 ```
 
-### Segment5 is from point4 to third peak. Return the third peak start point. (point 5)
-
-#### Need to change the x axis
+Not working so well due to the negative values at the start. Lets try remove that noise.
 ```{r}
-seg5.test = cpt.mean(data[point4:top_3_peaks_indices_p1[3], "p1"])
-point5 = point4 + cpts(seg5.test)
-plot(seg5.test)
-text(cpts(seg5.test), 0.5, point5, font = 2)
+(p3.binseg2 = cpt.mean(data[1000:nrow(data), "p3"], method = "BinSeg", Q = 6, minseglen = 500))
+plot(p3.binseg2)
 ```
 
-### Segment6 is from point5 to the end. Return the third peak end point. (point 6)
+Not working so well.
 
-#### Need to change the x axis
+#### Comment
+After attempts on the whole dataset, we found that change point function worked pretty well for sensor 1, but not really for other sensors. 
+The parameters (method used, "PELT" or "BinSeg", value of Q, 6 or 7, ...) needed are not consistent.
+
+Decided to stick to the non-greedy method (default method = "AMOC", at most one change), where we feed in each segment of data to the cpt function (using the top 3 peaks we found), get each change point step by step.
+
+### NOW: Smooth the data out, reduce the effect of the noise.
+
+## For smoothed.df - NOTE: x axis is *rectime* not id (start from 48360 not 1)
 ```{r}
-seg6.test = cpt.mean(data[point5:nrow(data), "p1"])
-point6 = point5 + cpts(seg6.test)
-plot(seg6.test)
-text(cpts(seg6.test), 0.5, point6, font = 2)
+source("smooth-trial.R")
+g.smoothed
 ```
 
-
-
-
-### For sensor 2, GET THE TOP 3 PEAKS
+### Greedy method ###
+#### Attempt 1 - Try use "PELT" to get all 6 change points at once.
 ```{r}
-top_3_peaks_p2 = findpeaks(data$p2,  minpeakheight = 1, minpeakdistance = 500, npeaks = 3)
-plot(data$p2, type = "l")
-points(top_3_peaks_p2[, 2], top_3_peaks_p2[, 1], pch = 15, col = "red")
-text(top_3_peaks_p2[, 2] + 250, top_3_peaks_p2[, 1], as.character(top_3_peaks_p2[, 2]))
-```
-```{r}
-(cpt.test2 = cpt.mean(data$p2, method = "BinSeg", minseglen = 1000, Q = 7))
-
-cpoints.sensor2 = cpts(cpt.test2)
-
-plot(cpt.test2)
+smooth.pelt = cpt.mean(smoothed.df$pressure, method = "PELT", minseglen = 5000)
+plot(smooth.pelt)
 ```
 
-### For sensor 3
+Same problem as before, noise at the start had been picked up.
 
+#### Attempt 2 - Try use "BinSeg" to get all 6 change points at once.
 ```{r}
-plot(data$p3, type = "l")
-peaks3_p3 = findpeaks(data$p3, minpeakheight = 1, minpeakdistance = 500, npeaks = 3)
-points(peaks3_p3[, 2], peaks3_p3[, 1], pch = 15, col = "red")
+smooth.binseg <- cpt.mean(smoothed.df$pressure, method = "BinSeg", Q = 6, minseglen = 5000)
+plot(smooth.binseg)
 ```
 
-```{r}
-(cpt.test3 = cpt.mean(data$p3, method = "BinSeg", Q = 6))
-cpoints = cpts(cpt.test3)
+Using "BinSeg" did not solve the problem. 
 
-plot(cpt.test3)
+#### Attempt 3 - removed the first 10s of the data. Use "PELT" to get all 6 points.
+
+##### Need to change x axis
+```{r}
+smooth.pelt2 = cpt.mean(smoothed.df$pressure[10000:nrow(smoothed.df)], method = "PELT", minseglen = 5000)
+plot(smooth.pelt2)
 ```
 
-
-
-
-# For all datasets (8 sensors)
+#### Results 5 rectime timestamps + 1 the end point
 ```{r}
-data.matrix = as.matrix(t(data[-9:-10]))
+c(cpts(smooth.pelt2) + 10000 + min(smoothed.df$rectime), max(smoothed.df$rectime))
+```
+It worked ok. But the parameter "minseglen" is really specific.
+
+#### Attempt 4 - removed the first 10s of the data. Use "BinSeg" to get all 6 points.
+```{r}
+smooth.binseg2 <- cpt.mean(smoothed.df$pressure[10000:nrow(smoothed.df)], method = "BinSeg", Q = 5, minseglen = 4000)
+plot(smooth.binseg2)
+```
+#### Results 5 rectime timestamps + 1 the end point
+```{r}
+c(cpts(smooth.binseg2) + 10000 + min(smoothed.df$rectime), max(smoothed.df$rectime))
 ```
 
+To get the results, once again, we switched around the parameter values. When apply this to another patient, it might not work so well as we need to manually change the values of "Q" and "minseglen."
 
+### Non-greedy (Patience is virtue) method ###
 ```{r}
-test.all = cpt.mean(data.matrix,  method = "BinSeg", Q = 7, minseglen = 700)
+#### Get the top 3 peaks first. 
+top_3_peaks = findpeaks(smoothed.df$pressure, minpeakdistance = 500, npeaks = 3)
+top_3_peaks_indices = top_3_peaks[, 2]
+plot(smoothed.df$pressure, type = "l")
+points(top_3_peaks[, 2], top_3_peaks[, 1], pch = 15, col = "red")
+text(top_3_peaks[, 2] + 250, top_3_peaks[, 1], as.character(top_3_peaks[, 2]))
 
-lapply(test.all, cpts)
+source("get6points.R")
+mypoints = get6points(smoothed.df, "pressure", top_3_peaks_indices)
+
 ```
 
+Now we have our 6 points!!!!!!!!!!!!!!!!!!! YAH  !!!!!!!!!!!!!!
 
-### Comment: Smooth the data out, reduce the effect of the noise.
-
+## For whole data (8 sensors) - Back to our original data
 ```{r}
-data
+start.end.rectime = smoothed.df$rectime[unlist(mypoints)]
 ```
 
+## Let's have a look at each individual contraction !!!!
 
+```{r}
+for (i in 1:3) {
+  start = start.end.rectime[i*2 - 1]
+  end = start.end.rectime[i*2]
+  print(myplot(getsubdata(data, start, end), name = paste0("pfmc no.", i)))
+  print(plot2(getsubdata(data, start, end), name = paste0("pfmc no.", i)))
+}
 
+```
+## Lets write everything in one function
+```{r}
+zoompfmc = function(data){
+  # Load in all the helper functions
+  source("Functions.R")
 
+  # Get our smoothed df
+  tidydata = tidy(data)
+  lo.whole = loess(pressure ~ rectime, data = tidydata, span = 0.1)
+  smoothed.df = unique(data.frame(rectime = tidydata$rectime[order(tidydata$rectime)], 
+                            pressure = predict(lo.whole)[order(tidydata$rectime)]))
+  
+  # Get the top 3 peaks indices
+  top_3_peaks = findpeaks(smoothed.df$pressure, minpeakdistance = 500, npeaks = 3)
+  top_3_peaks_indices = top_3_peaks[, 2]
 
+  source("get6points.R")
+  
+  # Get our change points
+  mypoints = get6points(smoothed.df, "pressure", top_3_peaks_indices)
+  start.end.rectime = smoothed.df$rectime[unlist(mypoints)]
+  
+  # Print our individual PFMCs
+  for (i in 1:3) {
+    start = start.end.rectime[i*2 - 1]
+    end = start.end.rectime[i*2]
+    print(myplot(getsubdata(data, start, end), name = paste0("pfmc no.", i)))
+    print(plot2(getsubdata(data, start, end), name = paste0("pfmc no.", i)))
+  }
+}
 
-
-
-
-
-
-
-
-
+zoompfmc(pfmcchange.df.list$pfmcchange.patient3)
+```
 
