@@ -320,8 +320,8 @@ pfmcdatalist = lapply(data_folders, process)
 # Extract out all baseline removed data(called pfmcchange data)
 pfmcchange.df.list = list()
 for (i in 1:length(pfmcdatalist)) {
-  pfmcchange.df.list[[i]] = pfmcdatalist[[i]][[2]]
-  names(pfmcchange.df.list)[i] = names(pfmcdatalist[[i]])[2]
+  pfmcchange.df.list[[i]] = pfmcdatalist[[i]][[4]]
+  names(pfmcchange.df.list)[i] = names(pfmcdatalist[[i]])[4]
 }
 ```
 
@@ -333,14 +333,14 @@ pressure.plots = list()
 
 # Get the plots
 for (i in (1:length(pfmcdatalist))) {
-  pressure.plot.name = as.character(names(pfmcdatalist[[i]])[1])
-  change.plot.name = as.character(names(pfmcdatalist[[i]])[2])
+  pressure.plot.name = as.character(names(pfmcdatalist[[i]])[3])
+  change.plot.name = as.character(names(pfmcdatalist[[i]])[4])
   
-  pressure.plots[[i]] = myplot(pfmcdatalist[[i]][[1]], name = pressure.plot.name)
+  pressure.plots[[i]] = myplot(pfmcdatalist[[i]][[3]], name = pressure.plot.name)
   
   names(pressure.plots)[[i]] = pressure.plot.name
   
-  change.plots[[i]] = myplot(pfmcdatalist[[i]][[2]], name = change.plot.name)
+  change.plots[[i]] = myplot(pfmcdatalist[[i]][[4]], name = change.plot.name)
   
   names(change.plots)[[i]] = change.plot.name
 }
