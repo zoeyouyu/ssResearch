@@ -1,0 +1,176 @@
+{
+  "patient_id": "5",
+  "patient_name": "AKK14",
+  "clinician_name": "TODO",
+  "session_id": 9,
+  "session_datetime": "20180208113729",
+  "session_timezone": "Pacific\/Auckland",
+  "profile_id": "kari_bo_protocol",
+  "profile_version": "TODO",
+  "recordings": [
+    {
+      "android_sdk": 23,
+      "android_release": "6.0.1",
+      "android_device": "Asus Nexus 7 (razor)",
+      "code_version": 28,
+      "device_name": "pfd0090",
+      "device_address": "E0:21:67:6C:01:CA",
+      "filepath": "20180208_114131.data",
+      "start_datetime": "20180208_114131",
+      "start": 1518043291633,
+      "stop": 1518044097874,
+      "filesize": 3981,
+      "md5sum": "e7ed089738204ee1310e422c2e971bbc"
+    }
+  ],
+  "exercise_order": [
+    "relax30s",
+    "pfmc3x5s_rest10s",
+    "external_rotators",
+    "abdominals",
+    "inspiration",
+    "expiration",
+    "gluteals",
+    "curlups_3x",
+    "hip_adductors",
+    "hip_abductors",
+    "pelvic_tilt_3x",
+    "internal_rotators",
+    "relax_30s",
+    "cough_2x"
+  ],
+  "exercises": [
+    {
+      "exercise": "relax30s",
+      "number": "1",
+      "start": 1518043292541,
+      "stop": 1518043323163,
+      "tasks_done_at": []
+    },
+    {
+      "exercise": "pfmc3x5s_rest10s",
+      "number": "2",
+      "start": 1518043340080,
+      "stop": 1518043396961,
+      "tasks_done_at": []
+    },
+    {
+      "exercise": "external_rotators",
+      "number": "3",
+      "start": 1518043430738,
+      "stop": 1518043462340,
+      "tasks_done_at": []
+    },
+    {
+      "exercise": "abdominals",
+      "number": "4",
+      "start": 1518043487330,
+      "stop": 1518043518364,
+      "tasks_done_at": []
+    },
+    {
+      "exercise": "inspiration",
+      "number": "5",
+      "start": 1518043563789,
+      "stop": 1518043614574,
+      "tasks_done_at": []
+    },
+    {
+      "exercise": "expiration",
+      "number": "6",
+      "start": 1518043645088,
+      "stop": 1518043698047,
+      "tasks_done_at": []
+    },
+    {
+      "exercise": "gluteals",
+      "number": "7",
+      "start": 1518043726391,
+      "stop": 1518043758872,
+      "tasks_done_at": []
+    },
+    {
+      "exercise": "curlups_3x",
+      "number": "8",
+      "start": 1518043790724,
+      "stop": 1518043822795,
+      "tasks_done_at": []
+    },
+    {
+      "exercise": "hip_adductors",
+      "number": "9",
+      "start": 1518043844865,
+      "stop": 1518043876312,
+      "tasks_done_at": []
+    },
+    {
+      "exercise": "hip_abductors",
+      "number": "10",
+      "start": 1518043889729,
+      "stop": 1518043921248,
+      "tasks_done_at": []
+    },
+    {
+      "exercise": "pelvic_tilt_3x",
+      "number": "11",
+      "start": 1518043952661,
+      "stop": 1518043984723,
+      "tasks_done_at": []
+    },
+    {
+      "exercise": "internal_rotators",
+      "number": "12",
+      "start": 1518044002902,
+      "stop": 1518044034225,
+      "tasks_done_at": []
+    },
+    {
+      "exercise": "relax_30s",
+      "number": "13",
+      "start": 1518044042086,
+      "stop": 1518044072941,
+      "tasks_done_at": []
+    },
+    {
+      "exercise": "cough_2x",
+      "number": "14",
+      "start": 1518044079887,
+      "stop": 1518044083852,
+      "tasks_done_at": []
+    }
+  ],
+  "notes": [
+    {
+      "datetime": 1518043194506,
+      "note": "Zeroed channel 0: value = 758.6595"
+    },
+    {
+      "datetime": 1518043194513,
+      "note": "Zeroed channel 1: value = 758.62195"
+    },
+    {
+      "datetime": 1518043194517,
+      "note": "Zeroed channel 2: value = 765.61255"
+    },
+    {
+      "datetime": 1518043194520,
+      "note": "Zeroed channel 3: value = 764.0374"
+    },
+    {
+      "datetime": 1518043194523,
+      "note": "Zeroed channel 4: value = 764.87"
+    },
+    {
+      "datetime": 1518043194525,
+      "note": "Zeroed channel 5: value = 765.79254"
+    },
+    {
+      "datetime": 1518043194529,
+      "note": "Zeroed channel 6: value = 765.68756"
+    },
+    {
+      "datetime": 1518043194531,
+      "note": "Zeroed channel 7: value = 766.59515"
+    }
+  ]
+}

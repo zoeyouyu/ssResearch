@@ -1,4 +1,7 @@
 .Rproj.user
 .Rhistory
-.RData
+*.RData
 .Ruserdata
+PeakPFMCCompare.xlsx
+ssResearch/**/*.png
+ssResearch/**/*.csv

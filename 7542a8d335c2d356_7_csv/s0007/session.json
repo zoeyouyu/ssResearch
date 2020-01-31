@@ -1,0 +1,169 @@
+{
+  "patient_id": "3",
+  "patient_name": "Kealy France Kari ",
+  "clinician_name": "TODO",
+  "session_id": 7,
+  "session_datetime": "20180207115028",
+  "session_timezone": "Pacific\/Auckland",
+  "profile_id": "kari_bo_protocol",
+  "profile_version": "TODO",
+  "recordings": [
+    {
+      "android_sdk": 23,
+      "android_release": "6.0.1",
+      "android_device": "Asus Nexus 7 (razor)",
+      "code_version": 28,
+      "device_name": "pfd0084",
+      "device_address": "DC:B7:49:86:5A:CA",
+      "filepath": "20180207_115554.data",
+      "start_datetime": "20180207_115554",
+      "start": 1517957754177,
+      "stop": 1517958549792,
+      "filesize": 3828,
+      "md5sum": "2dd98160e65a04c0b576c9f3f5258b4c"
+    }
+  ],
+  "exercise_order": [
+    "relax30s",
+    "pfmc3x5s_rest10s",
+    "hip_adductors",
+    "pelvic_tilt_3x",
+    "gluteals",
+    "expiration",
+    "curlups_3x",
+    "external_rotators",
+    "internal_rotators",
+    "hip_abductors",
+    "abdominals",
+    "inspiration",
+    "relax_30s",
+    "cough_2x"
+  ],
+  "exercises": [
+    {
+      "exercise": "relax30s",
+      "number": "1",
+      "start": 1517957755331,
+      "stop": 1517957785986,
+      "tasks_done_at": []
+    },
+    {
+      "exercise": "pfmc3x5s_rest10s",
+      "number": "2",
+      "start": 1517957802539,
+      "stop": 1517957861295,
+      "tasks_done_at": []
+    },
+    {
+      "exercise": "hip_adductors",
+      "number": "3",
+      "start": 1517957884995,
+      "stop": 1517957921635,
+      "tasks_done_at": []
+    },
+    {
+      "exercise": "gluteals",
+      "number": "5",
+      "start": 1517957953295,
+      "stop": 1517957991232,
+      "tasks_done_at": []
+    },
+    {
+      "exercise": "expiration",
+      "number": "6",
+      "start": 1517958026600,
+      "stop": 1517958071342,
+      "tasks_done_at": []
+    },
+    {
+      "exercise": "curlups_3x",
+      "number": "7",
+      "start": 1517958118203,
+      "stop": 1517958149927,
+      "tasks_done_at": []
+    },
+    {
+      "exercise": "external_rotators",
+      "number": "8",
+      "start": 1517958176799,
+      "stop": 1517958213436,
+      "tasks_done_at": []
+    },
+    {
+      "exercise": "internal_rotators",
+      "number": "9",
+      "start": 1517958226057,
+      "stop": 1517958253680,
+      "tasks_done_at": []
+    },
+    {
+      "exercise": "hip_abductors",
+      "number": "10",
+      "start": 1517958267622,
+      "stop": 1517958302007,
+      "tasks_done_at": []
+    },
+    {
+      "exercise": "abdominals",
+      "number": "11",
+      "start": 1517958356936,
+      "stop": 1517958393179,
+      "tasks_done_at": []
+    },
+    {
+      "exercise": "inspiration",
+      "number": "12",
+      "start": 1517958415255,
+      "stop": 1517958453311,
+      "tasks_done_at": []
+    },
+    {
+      "exercise": "relax_30s",
+      "number": "13",
+      "start": 1517958468727,
+      "stop": 1517958499569,
+      "tasks_done_at": []
+    },
+    {
+      "exercise": "cough_2x",
+      "number": "14",
+      "start": 1517958506682,
+      "stop": 1517958509761,
+      "tasks_done_at": []
+    }
+  ],
+  "notes": [
+    {
+      "datetime": 1517957739220,
+      "note": "Zeroed channel 0: value = 761.6897"
+    },
+    {
+      "datetime": 1517957739223,
+      "note": "Zeroed channel 1: value = 766.3476"
+    },
+    {
+      "datetime": 1517957739232,
+      "note": "Zeroed channel 2: value = 763.07733"
+    },
+    {
+      "datetime": 1517957739236,
+      "note": "Zeroed channel 3: value = 758.9295"
+    },
+    {
+      "datetime": 1517957739239,
+      "note": "Zeroed channel 4: value = 760.7371"
+    },
+    {
+      "datetime": 1517957739241,
+      "note": "Zeroed channel 5: value = 761.1872"
+    },
+    {
+      "datetime": 1517957739244,
+      "note": "Zeroed channel 6: value = 758.61444"
+    },
+    {
+      "datetime": 1517957739247,
+      "note": "Zeroed channel 7: value = 760.5271"
+    }
+  ]
+}

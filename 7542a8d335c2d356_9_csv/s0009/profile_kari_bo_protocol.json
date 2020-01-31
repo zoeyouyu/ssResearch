@@ -1,0 +1,99 @@
+{
+  "id": "kari_bo",
+  "label": "Kari Bo Protocol",
+  "description": "Profile for Kari Bo study.",
+  "version": 20180201,
+  "groups": ["abi_testing"],
+  "exercise_groups":
+  [
+    {
+      "repeat": 1,
+      "exercises":
+      [
+        {
+          "id": "relax30s",
+          "label": "Relax for 30s",
+          "activity": "At rest, quiet relaxation, no activity 30s.",
+          "randomise": 0},
+
+        {
+          "id": "pfmc3x5s_rest10s",
+          "label": "PFMC's 3 x 5s",
+          "activity": "Relax for 15s, then 3 x5s maximum PFMC with 10s rest intervals.",
+          "randomise": 1},
+
+        {
+          "id": "curlups_3x",
+          "label": "Curl-ups x3",
+          "activity": "Relax for 5s, then curl-ups x 3 with shoulders off the floor and hold for 5s, rest for 5s",
+          "randomize": 1},
+
+        {
+          "id": "pelvic_tilt_3x",
+          "label": "Pelvic tilt x3",
+          "activity": "Relax for 5s, then pelvic tilt x3 with hold for 5s, rest for 5s",
+          "randomize": 1},
+
+        {
+          "id": "abdominals",
+          "label": "Abdominals",
+          "activity": "Relax for 5s, drawing-in of abdomen x3 holding for 5s with a 5s rest interval",
+          "randomize": 1},
+
+        {
+          "id": "gluteals",
+          "label": "Gluteals",
+          "activity": "Relax for 5s, contract the gluteal muscles (buttocks) x3 holding for 5s with a 5s rest interval",
+          "randomize": 1},
+
+        {
+          "id": "inspiration",
+          "label": "Inspiration",
+          "activity": "Relax for 5s, breathe in deeply, hold for 5s, breathe out to empty lungs. Repeat x3 with a 10s rest between breaths.",
+          "randomize": 1},
+
+        {
+          "id": "expiration",
+          "label": "Expiration",
+          "activity": "Relax for 5s, breathe out fully, hold for 5s, breathe in deeply to fill lungs. Repeat x3 with a 10s rest between breaths.",
+          "randomize": 1},
+
+        {
+          "id": "hip_adductors",
+          "label": "Hip adductors",
+          "activity": "Relax for 5s, contract hip adductors (against a resistance) x3 holding for 5s with a 5s rest intervals.",
+          "randomize": 1},
+
+        {
+          "id": "hip_abductors",
+          "label": "Hip abductors",
+          "activity": "Relax for 5s, contract hip abductors (against a resistance) x3 holding for 5s with a 5s rest intervals.",
+          "randomize": 1},
+
+        {
+          "id": "external_rotators",
+          "label": "External rotators",
+          "activity": "Relax for 5s, contract external rotators (against a resistance) x3 holding for 5s with a 5s rest intervals.",
+          "randomize": 1},
+
+        {
+          "id": "internal_rotators",
+          "label": "Internal rotators",
+          "activity": "Relax for 5s, contract internal rotators (against a resistance) x3 holding for 5s with a 5s rest intervals.",
+          "randomize": 1},
+
+        {
+          "id": "relax_30s",
+          "label": "Relax for 30s",
+          "activity": "Relax for 30 seconds quite breathing no activity.",
+          "randomize": 0},
+
+        {
+          "id": "cough_2x",
+          "label": "Cough 2x",
+          "randomize": 0}
+
+      ]
+    }
+  ]
+}
