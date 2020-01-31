@@ -64,7 +64,7 @@ top_3_peaks = findpeaks(smoothed.df$pressure, minpeakdistance = 500, npeaks = 3)
 top_3_peaks_indices = top_3_peaks[, 2]
 plot(smoothed.df$pressure, type = "l")
 points(top_3_peaks[, 2], top_3_peaks[, 1], pch = 15, col = "red")
-text(top_3_peaks[, 2] + 250, top_3_peaks[, 1], as.character(top_3_peaks[, 2]))
+text(top_3_peaks[, 2] + 300, top_3_peaks[, 1], as.character(top_3_peaks[, 2]))
 ```
 
 
