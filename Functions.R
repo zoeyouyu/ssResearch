@@ -1,7 +1,16 @@
+##### Preparing packages
+
+# install.packages("tidyverse")
+# install.packages("rjson")
+# install.packages("quantmod")
+
 library(tidyverse)
 library(rjson)
 library(quantmod)
 library(pracma)
+library(changepoint)
+library(purrr)
+
 ###### A function that tidys up a given dataset
 tidy = function(data){
   data %>%
@@ -57,7 +66,7 @@ get_description = function(id){
   
   id_list = get_id_list(folder)
   
-  # Get rid of info after "."
+  # Get rid of info (.patientid) after "."
   id = strsplit(id, "\\.")[[1]][1]
   id = gsub("data|change", "", id)
   
@@ -86,8 +95,13 @@ get_description = function(id){
 
 ###### A function of extracting start/stop time for a given exercise
 # (modified from the individual subject s0007 version)
-getrectime = function(folder, exercise, session, profile){
-
+getrectime = function(folder, exercise){
+  
+  # Get the json info of this subject
+  json.info.list = get.json.info(folder)
+  session = json.info.list$session
+  profile = json.info.list$profile
+  
   # Get the starting time from recordings
   rec = session$recordings
   start = rec[[1]]$start
@@ -126,14 +140,14 @@ getsubdata = function(data, start, stop){
 
 ###### A function plot pressure values vs time (in seconds), 
 ###### where the time variable is indicating how long after the this exercise has begun
-myplot = function(data, name = NULL){
+myplot = function(data, name = NULL) {
   # mutate a new time variable 
   # by subtract the recoring time varibale by its starting time (minimal value)
   # Note, there are some missingness
   data$time = data$rectime - min(data$rectime)
   
   timelength = max(data$time)
-  
+  description = NULL
   # Default time gap is 1s
   gap = 1000
   
@@ -146,11 +160,8 @@ myplot = function(data, name = NULL){
   # Take 50s as the gap if total time is greater than 30 seconds
   if (timelength > 500000) { gap = 50000 }
   
-  if (is.null(name) == TRUE) {
-    description = NULL
-  }
-  
-  else {
+
+  if (is.null(get_description(name) == FALSE)) {
     description = paste("Instruction:", get_description(name))
   }
   
@@ -221,7 +232,7 @@ process = function(folder){
 
   # Get the start/end time of the pfmc exercise
   name = "pfmc"
-  rectime = getrectime(folder, name, session, profile)
+  rectime = getrectime(folder, name)
   
   # Get pfmc data
   pfmcdata = getsubdata(data, rectime[[1]], rectime[[2]])
@@ -236,10 +247,12 @@ process = function(folder){
   # Subset the pfmc data
   pfmcchange = getsubdata(newdata, rectime[[1]], rectime[[2]])
   
-  # Retutn pfmc dataset, one original, one change
-  datalist = list(pfmcdata, pfmcchange)
+  # Retutn the whole dataset, pfmc dataset, one original, one change
+  datalist = list(data, newdata, pfmcdata, pfmcchange)
   
-  names(datalist) = c(paste0("pfmcdata.patient", patient_id), 
+  names(datalist) = c(paste0("whole.patient", patient_id),
+                      paste0("wholechange.patient", patient_id),
+                      paste0("pfmcdata.patient", patient_id), 
                       paste0("pfmcchange.patient", patient_id))
   
   datalist
