@@ -1,0 +1,79 @@
+---
+title: "s0007"
+author: "Zoe Zhou"
+date: "10/12/2019"
+output: pdf_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+# Found the folder that contains patient data s0007
+folders = list.files(pattern = "_csv")
+folder = folders[grep("_7_", folders)]
+
+# Process the folder, get df.list (containing 3 datasets)
+source("Functions.R")
+df.list = process(folder)
+data = df.list[[1]]
+
+# Check where is the crazy data at the end
+end = grep("FALSE", data[-1] < 800)[1]
+
+# Get rid of that crazy part and plot
+data[1:(end-50), ] %>% myplot(name = names(df.list)[1])
+```
+##### Remove the baseline and plot the whole
+```{r}
+myplot(df.list[[2]][1:(end-50), ], name = names(df.list)[2])
+```
+
+##### Get the pfmc data and plot it
+```{r}
+myplot(df.list[[3]], name = names(df.list)[3])
+#ggsave("PFMC.png", width = 10, height = 5)
+```
+##### Remove the baseline and plot it
+```{r}
+myplot(df.list[[4]], name = names(df.list)[4])
+ggsave("PFMC change.png", width = 10, height = 5)
+```
+
+##### Create a new time variable, and add a axis labelling in seconds
+---Create a new time variable , by subtracting the recording time variable by its starting time (the minimal value)
+
+```{r}
+pfmcdata = df.list[[3]]
+pfmcdata$time = pfmcdata$rectime - min(pfmcdata$rectime)
+```
+
+---Note, there are some missingness in the data (time gap is not always 10 ms) 
+
+** This might cause a slipperage in data (a drastic drop)
+
+** E.g. TIME = 1640	 to 1680 time gap is 40ms, we lost the data in between **
+```{r}
+recno = ifelse(diff(pfmcdata$rectime) == 10, "good", NA)
+# Give the last one NaN
+pfmcdata$isna = as.factor(c(recno, NaN))
+summary(pfmcdata$isna)
+```
+
+Apparently, we have 15 missing values. But so far, it does not affect our plotting.
+
+
+
+
+
+
+
+
+
+
+
+
+
