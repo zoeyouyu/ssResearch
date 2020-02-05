@@ -65,28 +65,37 @@ get_description = function(id){
   folder = list.files(pattern = "_csv")[1]
   
   id_list = get_id_list(folder)
-  
-  # Get rid of info (.patientid) after "."
-  id = strsplit(id, "\\.")[[1]][1]
-  id = gsub("data|change", "", id)
-  
-  # Get the exercise order in the list
-  id_order = grep(id, id_list)
-
-  if (length(id_order) == 0) {
-    description = NULL
-  } else {
-
-    # Get the exercise list
-    exercise_list = get.json.info(folder)$exercise_list
-    
-    # Get the exercise
-    exercise_list[[id_order]]
-
-    # Get the description
-    description = exercise_list[[id_order]]$activity
+  if (is.null(id) == TRUE) {
+     return(NULL)
   }
-
+  # Get rid of info (.participantid) after "."
+  if (length(strsplit(id, "\\.")[[1]]) > 1) {
+    description = "Maximum PFM Contration for 5s."
+  }
+  
+  else {
+    id = strsplit(id, "\\.")[[1]][1]
+    id = gsub("data|change", "", id)
+    
+    
+    # Get the exercise order in the list
+    id_order = grep(id, id_list)
+    
+    if (length(id_order) == 0) {
+      description = NULL
+    } else {
+      
+      # Get the exercise list
+      exercise_list = get.json.info(folder)$exercise_list
+      
+      # Get the exercise
+      exercise_list[[id_order]]
+      
+      # Get the description
+      description = exercise_list[[id_order]]$activity
+    }
+  }
+  
   description
 }
 
@@ -161,7 +170,7 @@ myplot = function(data, name = NULL) {
   if (timelength > 500000) { gap = 50000 }
   
 
-  if (is.null(get_description(name) == FALSE)) {
+  if (is.null(get_description(name)) == FALSE) {
     description = paste("Instruction:", get_description(name))
   }
   
@@ -172,9 +181,9 @@ myplot = function(data, name = NULL) {
     geom_line(position = position_dodge(width = 0.2)) +
     scale_x_discrete(limits = seq(0, round(max(data$time)/1000) * 1000, gap), 
                      labels = seq(0, round(max(data$time)/1000), gap/1000)) +
-    labs(x = "Time (in s)", y = "Pressure (in mm Hg)",
+    labs(x = "Time (s)", y = "Pressure (mmHg)",
          title = paste("Pressure trace from", name),
-         caption = description) +
+         caption = description)  +
     scale_color_brewer(palette = "Set1") + 
     guides(color = guide_legend(override.aes = list(size = 5)))
   
@@ -194,7 +203,7 @@ plot2 = function(data, name = NULL){
     ggplot(aes(x = rectime, y = pressure, 
                group = sensor, color = sensor)) +
     geom_line(position = position_dodge(width = 0.2)) +
-    labs(x = "Recording Time (in ms)", y = "Pressure (in mm Hg)",
+    labs(x = "Recording Time (in ms)", y = "Pressure (in mmHg)",
          title = paste("Pressure trace from", name),
          caption = description) +   
     scale_color_brewer(palette = "Set1") + 
@@ -222,8 +231,8 @@ process = function(folder){
   session = json.info.list$session
   profile = json.info.list$profile
   
-  # Get patient id
-  patient_id = json.info.list$session$patient_id
+  # Get participant id
+  participant_id = json.info.list$session$patient_id
   
   # Rename columns
   colnames(whole) = c("rectime", paste0("p", 1:8), paste0("t", 1:8))
@@ -250,10 +259,10 @@ process = function(folder){
   # Retutn the whole dataset, pfmc dataset, one original, one change
   datalist = list(data, newdata, pfmcdata, pfmcchange)
   
-  names(datalist) = c(paste0("whole.patient", patient_id),
-                      paste0("wholechange.patient", patient_id),
-                      paste0("pfmcdata.patient", patient_id), 
-                      paste0("pfmcchange.patient", patient_id))
+  names(datalist) = c(paste0("whole.participant", participant_id),
+                      paste0("wholechange.participant", participant_id),
+                      paste0("pfmcdata.participant", participant_id), 
+                      paste0("pfmcchange.participant", participant_id))
   
   datalist
   
