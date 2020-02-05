@@ -3,6 +3,4 @@
 *.RData
 .Ruserdata
 PeakPFMCCompare.xlsx
-ssResearch/**/*.png
-ssResearch/**/*.csv
 *.png
