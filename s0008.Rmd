@@ -19,13 +19,17 @@ folder = folders[grep("_8_", folders)]
 source("Functions.R")
 df.list = process(folder)
 data = df.list[[1]]
+```
 
+
+```{r}
 # Check where is the crazy data at the end
 end = grep("FALSE", data[-1] < 800)[1]
 
 # Get rid of that crazy part and plot
 data[1:(end-50), ] %>% myplot(name = names(df.list)[1])
 ```
+
 ##### Remove the baseline and plot the whole
 ```{r}
 myplot(df.list[[2]][1:(end-50), ], name = names(df.list)[2])
@@ -62,7 +66,171 @@ summary(pfmcdata$isna)
 
 Apparently, we have 79 missing values. But so far, it does not affect our plotting.
 
+### For PFMC change data, we wanna dive closer to see each contraction!!!!!!!!!!!!!
+### To get smoothed.df to reduce the effect of noise (the smoothed line captures the pattern of trace fairly well)
+```{r}
+tidydata = tidy(df.list[[4]])
+lo.whole = loess(pressure ~ rectime, data = tidydata, span = 0.1)
+plot(tidydata$rectime, tidydata$pressure, pch = 21, cex = 0.5)
 
+lines(tidydata$rectime[order(tidydata$rectime)],
+      predict(lo.whole)[order(tidydata$rectime)],
+      col = "red", lwd = 2)
+```
+
+
+```{r}
+# Get smoothed.df
+smoothed.df = unique(data.frame(rectime = tidydata$rectime[order(tidydata$rectime)], 
+                            pressure = predict(lo.whole)[order(tidydata$rectime)]))
+smoothed.df$id = 1:nrow(smoothed.df)
+
+# Plot the smooth line
+ggplot(data = tidydata) +
+  geom_line(aes(x = rectime, y = pressure, color = sensor)) +
+  geom_line(data = smoothed.df, aes(x = rectime, y = pressure), size = 1) +
+  labs(x = "Recording Time (in s)", y = "Pressure Change (in mm Hg)",
+       title = "Pressure trace from all sensors with smoothed line") +
+  guides(color = guide_legend(override.aes = list(size = 5)))
+
+#ggsave("Colored Pressure traces with Smoothed Line.png", width = 10, height = 4)
+```
+
+### Use the non-greedy (Patience is virtue) method to find 6 change points
+
+
+############### Write a function determine *minpeakheight*   (depend on baseline noise)
+
+
+```{r}
+# Get the baseline noise
+noise = smoothed.df %>% 
+  filter(rectime < min(rectime + 15000)) %>%
+  summarise(maxdiff = max(pressure) - min(pressure)) %>%
+  as.numeric()
+```
+
+
+```{r}
+#### Get the top 3 peaks first. 
+top_3_peaks = findpeaks(smoothed.df$pressure, minpeakdistance = 500, minpeakheight = noise)
+top_3_peaks_indices = sort(top_3_peaks[, 2])
+plot(smoothed.df$pressure, type = "l")
+points(top_3_peaks[, 2], top_3_peaks[, 1], pch = 15, col = "red")
+text(top_3_peaks[, 2] + 300, top_3_peaks[, 1], as.character(top_3_peaks[, 2]))
+```
+
+### Non-greedy (Patience is virtue) method ###
+#### Segment1 is from the start to the 1st peak. Return the 1st peak start point. (point 1)
+```{r}
+seg1.test = cpt.meanvar(smoothed.df[1:top_3_peaks_indices[1], "pressure"])
+point1 = cpts(seg1.test)
+plot(seg1.test)
+text(cpts(seg1.test), 0, cpts(seg1.test), font = 2)
+```
+#### Segment2 is from point1 to the 2nd peak. Return the 1st peak end point. (point 2)
+
+#### Need to change the x axis
+```{r}
+seg2.test = cpt.meanvar(smoothed.df[point1:top_3_peaks_indices[2], "pressure"])
+point2 = cpts(seg1.test) + cpts(seg2.test)
+plot(seg2.test)
+text(cpts(seg2.test), 0, point2, font = 2)
+```
+#### Segment3 is from point2 to 2nd peak. Return the 2nd peak start point. (point 3)
+
+#### Need to change the x axis
+```{r}
+seg3.test = cpt.meanvar(smoothed.df[point2:top_3_peaks_indices[2], "pressure"])
+point3 = point2 + cpts(seg3.test)
+plot(seg3.test)
+text(cpts(seg3.test), 0, point3, font = 2)
+```
+
+#### Segment4 is from point3 to end. Return the 2nd peak end point. (point 4)
+
+#### Need to change the x axis
+```{r}
+seg4.test = cpt.mean(smoothed.df[point3:nrow(smoothed.df), "pressure"])
+
+point4 = ifelse(length(cpts(seg4.test)) == 0, nrow(data), point3 + cpts(seg4.test))
+print(ifelse(length(cpts(seg4.test)) == 0, "We don't have point 4", paste("We have Point 4 at", cpts(seg4.test))))
+```
+
+
+```{r}
+plot(seg4.test)
+text(cpts(seg4.test), 1.5, point4, font = 2)
+```
+
+
+## For whole data (8 sensors) - Back to our original data
+```{r}
+mypoints = c(point1, point2, point3, point4)
+                
+mypoints[c(1, 2)] = mypoints[c(1, 2)] + 30
+mypoints[3] = mypoints[3] - 30
+mypoints[4] = mypoints[4] - 30
+```
+
+```{r}
+start.end.rectime = smoothed.df$rectime[mypoints] 
+
+ggplot(data = tidydata) +
+  geom_line(aes(x = rectime, y = pressure, color = sensor)) +
+  geom_vline(xintercept = start.end.rectime)
+
+```
+
+## Let's have a look at each individual contraction !!!!
+
+```{r}
+#babyplots.p3 = list()
+for (i in 1:2) {
+  start = start.end.rectime[i*2 - 1]
+  end = start.end.rectime[i*2]
+  
+  # Each contraction original
+  #print(myplot(getsubdata(data, start, end), name = names(df.list)[4]) + 
+          #labs(subtitle = paste0("pfmc no.", i)) + theme_classic())
+
+  # Each contraction baseline removed
+  #babyplots.p3[[i]] = myplot(getsubdata(df.list[[4]], start, end)) + theme_classic()
+  print(myplot(getsubdata(df.list[[4]], start, end), name = paste0("Contraction No.", i)) + 
+          theme_classic() + 
+          theme(axis.text = element_text(face = "bold", size = 14),
+                axis.title = element_text(size = 20, face = "bold")))
+  #ggsave(paste0("Contraction No.", i, ".png"), height = 5, width = 8)
+}
+```
+
+## Let's have a look at each individual contraction !!!!
+
+```{r}
+# babyplots.p4 = list()
+# for (i in 1:2) {
+#   start = start.end.rectime[i*2 - 1]
+#   end = start.end.rectime[i*2]
+#   
+#   # Each contraction original
+#   #print(myplot(getsubdata(data, start, end), name = names(df.list)[4]) + 
+#           #labs(subtitle = paste0("pfmc no.", i)) + theme_classic())
+# 
+#   # Each contraction baseline removed
+#   babyplots.p4[[i]] = myplot(getsubdata(df.list[[2]], start, end)) + labs(title = paste0("Contraction No.", i)) + theme_classic()
+#   
+#   ggsave(paste0("Contraction No.", i, ".png"), height = 5, width = 8)
+# }
+# 
+# names(babyplots.p4) = c("c1", "c2")
+```
+
+
+```{r}
+# good2 = babyplots.p4$c1
+# 
+# myplot(getsubdata(df.list[[2]], start, end)) + theme_classic()
+```
 
 
 
