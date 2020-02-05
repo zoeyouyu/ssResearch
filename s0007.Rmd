@@ -134,8 +134,7 @@ text(top_3_peaks[, 2] + 300, top_3_peaks[, 1], as.character(top_3_peaks[, 2]))
 ### Non-greedy (Patience is virtue) method ###
 #### Segment1 is from the start to the 1st peak. Return the 1st peak start point. (point 1)
 ```{r}
-seg1 = smoothed.df %>% filter(id <= top_3_peaks_indices[1])
-seg1.test = cpt.meanvar(seg1$pressure)
+seg1.test = cpt.meanvar(smoothed.df[1:top_3_peaks_indices[1], "pressure"])
 point1 = cpts(seg1.test)
 plot(seg1.test)
 text(cpts(seg1.test), 0, cpts(seg1.test), font = 2)
@@ -144,8 +143,7 @@ text(cpts(seg1.test), 0, cpts(seg1.test), font = 2)
 
 #### Need to change the x axis
 ```{r}
-seg2 = smoothed.df %>% filter(id >= point1, id <= top_3_peaks_indices[2])
-seg2.test = cpt.meanvar(seg2$pressure)
+seg2.test = cpt.meanvar(smoothed.df[point1:top_3_peaks_indices[2], "pressure"])
 point2 = cpts(seg1.test) + cpts(seg2.test)
 plot(seg2.test)
 text(cpts(seg2.test), 0, point2, font = 2)
