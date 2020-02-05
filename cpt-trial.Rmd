@@ -26,10 +26,98 @@ m.pm <- cpt.mean(m.data, penalty = "Manual", pen.value = "1.5 * log(n)", method 
 plot(m.pm, type = "l", cpt.col = "blue", xlab = "Index", cpt.width = 4)
 cpts(m.pm)
 ```
+
+
 ```{r}
 m.bsm <- cpt.mean(m.data, "Manual", pen.value = "1.5 * log(n)", method = "BinSeg")
 plot(m.bsm, type = "l", xlab = "Index", cpt.width = 4)
 
 cpts(m.bsm)
 ```
+
+### Introduction to optimal changepoint detection algorithms
+### Task: Nile Data
+```{r}
+data(Nile)
+ts.plot(Nile)
+```
+
+```{r}
+nile.amoc = cpt.mean(Nile, penalty = "Manual", pen.value = 1, test.stat = "CUSUM")
+plot(nile.amoc)
+abline(v = start(Nile) + cpts(nile.amoc), lwd = 2)
+```
+```{r}
+param.est(nile.amoc)
+```
+
+## cpt.var
+```{r}
+set.seed(1)
+v1 = c(rnorm(100, 0, 1), rnorm(100, 0, 2), rnorm(100, 0, 9))
+plot(v1)
+```
+
+```{r}
+# same penalty as BIC/SIC
+v1.man = cpt.var(v1, method = "PELT", pen.value = "2*log(n)")
+cpts(v1.man)
+plot(v1.man)
+param.est(v1.man)
+```
+
+## cpt.meanvar
+```{r}
+set.seed(1)
+mv1 = c(rexp(50, rate = 1), rexp(50, 5), rexp(50, 2), rexp(50, 7))
+plot(mv1)
+```
+
+
+```{r}
+mv1.binseg = cpt.meanvar(mv1, test.stat = "Exponential", method = "BinSeg", Q = 10, penalty = "SIC")
+cpts(mv1.binseg)
+plot(mv1.binseg)
+param.est(mv1.binseg)
+
+```
+
+
+## Task: FTSE 100
+```{r}
+data(ftse100)
+plot(ftse100, type = "l", xlab = "Date", ylab = "Daily Return")
+```
+
+```{r}
+ftse.test = cpt.var(ftse100$V2, method = "BinSeg", Q = 10)
+plot(ftse.test)
+```
+
+
+
+```{r}
+param.est(ftse.test)
+```
+
+## Task - cpt.meanvar
+```{r}
+data(HC1)
+ts.plot(HC1)
+
+```
+
+
+```{r}
+hc1.test = cpt.meanvar(HC1, method = "BinSeg", Q = 15)
+plot(hc1.test)
+```
+
+
+
+
+
+
+
+
 
