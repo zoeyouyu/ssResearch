@@ -17,17 +17,16 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 # Found the folder that contains jenny data
-folder = list.files(pattern = ".csv", full = TRUE)
+folder = list.files(pattern = "jenny", full = TRUE)
 list.files(folder)
 
 ```
 
 ```{r}
-list.files(folder, pattern = ".csv", full.names = TRUE)[1]
+(all.csv = list.files(folder, pattern = ".csv", full.names = TRUE))
 ```
 
 ```{r}
-all.csv = list.files(folder, pattern = ".csv", full.names = TRUE)
 squeeze_and_hold = read.csv(all.csv[1])
 colnames(squeeze_and_hold) = c("rectime", paste0("p", 1:8))
 
@@ -38,11 +37,11 @@ source("Functions.R")
 
 
 ```{r}
-plot2(squeeze_and_hold, name = "Squeeze and hold data from Jenny")
+plot2(squeeze_and_hold, name = "Squeeze and hold data")
 ```
 
 ## df2 is the abient data
-```{r}
+```{r eval = FALSE}
 df2 = read.csv(all.csv[2])
 colnames(df2) = c("rectime", paste0("p", 1:8), paste0("t", 1:8))
 df2 = df2 %>% select(-(t1:t8))
@@ -61,7 +60,7 @@ plot2(first3seconds, name = "first 3 seconds")
 
 ```{r}
 change = baseline(squeeze_and_hold, first3seconds)
-plot2(change)
+plot2(change, name = "Squeeze and hold (baseline removed)")
 
 #ggsave("Squeeze and hold.png", height = 8, width = 16)
 ```
@@ -76,9 +75,9 @@ df3 = df3 %>% select(-(t1:t8))
 plot2(df3, name = "the whole recording")
 ```
 
+## Get the peak pressure values
 ```{r}
 change$peak = apply(change[, 1:8], 1, max)
-
 ```
 
 ## Try our old same method of smoothing
@@ -92,37 +91,38 @@ lines(tidydata$rectime[order(tidydata$rectime)],
       col = "red", lwd = 2)
 ```
 
-## Comment: Smoothing is not doing to well here (we can still use smoothed.df but peaks amplitudes are a bit small).
+## Comment: Smoothing is not doing to well here. 
+## we can still use smoothed.df but the peaks amplitudes are a bit small.
 
-## Capturing the peaks
+## Emphasize the peaks
 ```{r}
 plot2(change) + geom_line(aes(x = rectime, y = peak), size = 1, col = "black")
 ```
 
+
+## Preping for non greedy method
 #### Get the top 20 peaks first. 
 
 #### Note: changed minpeakdistane to 700 !!!!! Depends on the participant (time interval between contractions varies!!!!!!!!!!)
 ```{r}
-top_20_peaks = findpeaks(change$peak,  minpeakdistance = 700)
+top_20_peaks = findpeaks(change$peak, minpeakdistance = 700)
 top_20_peaks_indices = sort(top_20_peaks[, 2])
-```
 
-## Check if we actually get 20
-```{r}
+### Check if we actually get 20
 length(top_20_peaks_indices)
-```
 
-
-```{r}
 plot(change$peak, type = "l")
 points(top_20_peaks[, 2], top_20_peaks[, 1], pch = 15, col = "red")
-text(top_20_peaks[, 2] + 300, top_20_peaks[, 1]+2, as.character(top_20_peaks[, 2]))
+text(top_20_peaks[, 2] + 300, top_20_peaks[, 1] + 2, as.character(top_20_peaks[, 2]))
 ```
+
 ### Greedy method ###
 #### Trying to get the 40 change points at once
 ```{r}
 all.binseg = cpt.mean(change$peak, method = "BinSeg", Q = 40)
 greedy.fit = cpts(all.binseg)
+param.est(all.binseg)
+
 
 plot(all.binseg)
 ```
@@ -137,18 +137,13 @@ greedy.fit
 ## For whole data (8 sensors) - Back to our original data
 ```{r}
 mypoints = greedy.fit
-                
-# mypoints[c(1, 2)] = mypoints[c(1, 2)] - 30
-# mypoints[3] = mypoints[3] - 80
-# mypoints[4] = mypoints[4] - 100
-# mypoints[5] = mypoints[5] - 130
 ```
 
-## Just double check if we get the changepoints right (can manually modify a bit here)
+## Just double check if we actually get the changepoints right (can manually modify a bit here ig needed)
 ```{r}
 start.end.rectime = change$rectime[mypoints] 
 
-plot2(change) +
+plot2(change) + theme_void() + 
   geom_vline(xintercept = start.end.rectime)
 
 ```
@@ -164,71 +159,13 @@ for (i in 1:20) {
   print(myplot(getsubdata(change, start, end), name = paste0("Contraction No.", i)) + 
           theme_classic() + 
           theme(axis.text = element_text(face = "bold", size = 14),
-                axis.title = element_text(size = 20, face = "bold")))
+                axis.title = element_text(face = "bold", size = 14)))
   
   #ggsave(paste0("Contraction No.", i, ".png"), height = 5, width = 8)
 }
 
 
 ```
-
-
-
-### Non-greedy (Patience is virtue) method ###
-#### Segment1 is from the start to the 1st peak. Return the 1st peak start point. (point 1)
-```{r}
-# seg1.test = cpt.meanvar(change[1:top_20_peaks_indices[1], "peak"])
-# 
-# param.est(seg1.test)
-```
-
-
-```{r}
-# point1 = cpts(seg1.test)
-# plot(seg1.test)
-# text(cpts(seg1.test), param.est(seg1.test)$mean[2], cpts(seg1.test), font = 2)
-```
-
-#### Segment2 is from point1 to the 2nd peak. Return the 1st peak end point. (point 2)
-
-#### Need to change the x axis
-```{r}
-# seg2.test = cpt.meanvar(change[point1:top_20_peaks_indices[2], "peak"])
-# param.est(seg2.test)
-```
-
-
-```{r}
-# point2 = point1 + cpts(seg2.test)
-# plot(seg2.test)
-# text(cpts(seg2.test), param.est(seg2.test)$mean[2], point2, font = 2)
-# axis(1)
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
