@@ -1,0 +1,130 @@
+---
+title: "jackie_1"
+author: "Zoe Zhou"
+date: "07/02/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Pressure values are records at a frequency of 50 Hz. 
+## So 50 measurements per second. 
+## 1 measurement every 20 milliseconds. 
+
+
+```{r}
+# Found the folder that contains jackie's data
+folder = list.files(pattern = "jackie1", full.names  = TRUE)
+list.files(folder)
+
+```
+
+```{r}
+(all.csv = list.files(folder, pattern = ".csv", full.names = TRUE))
+```
+```{r}
+session = fromJSON(file = list.files(path = folder, pattern = "session.json", recursive = TRUE, full.names = TRUE))
+
+
+
+# Find where Squeeze and hold exercise locate in the JSON file
+line = grep("Squeeze and Hold", unlist(session))
+# The next line is the time information
+squeeze_and_hold_start = as.numeric(unlist(session)[line + 1])
+
+# Find where the Knack exercise locate in the JSON file
+line2 = grep("The Knack", unlist(session))[1]
+# The next line is the time information
+the_knack_start = as.numeric(unlist(session)[line2 + 1])
+```
+
+### Read in all data 
+```{r}
+df.list = lapply(all.csv, read.csv)
+
+names(df.list) = paste0("df", 1:length(df.list))
+```
+
+### A helper function that define the column names and drop tempeture data
+```{r}
+define.col = function(df) {
+  colnames(df) = c("rectime", paste0("p", 1:8), paste0("t", 1:8))
+  
+  df = df %>% select(-(t1:t8))
+}
+```
+
+### Name the columns for all dfs
+```{r}
+df.list = lapply(df.list, define.col)
+
+source("Functions.R")
+```
+
+##### Note the time gao here is 25 ms, also we have quite a bit of missing data
+```{r}
+lapply(df.list, plot2)
+```
+
+### Comments: Seems like Squeeze and Hold is df1 to df5
+
+```{r}
+
+fix.time = function(df1, df2){
+  
+df2$rectime = max(df1$rectime) + df2$rectime
+
+}
+
+```
+
+
+```{r}
+whole = do.call("rbind", df.list)
+rownames(whole) = 1:nrow(whole)
+
+whole$rectime = seq(0, (nrow(whole) - 1)*25, 25)
+
+all(diff(whole$rectime) == 25)
+```
+
+```{r}
+plot2(whole, name = "the whole recording")
+```
+
+
+### Manually sectioned 19 seconds before the Knack starts
+```{r}
+whole %>% filter(rectime < (the_knack_start - squeeze_and_hold_start - 19000)) %>%
+  plot2(name = "Squeeze and hold")
+```
+```{r}
+squeeze_and_hold = whole %>% filter(rectime < (the_knack_start - squeeze_and_hold_start - 19000))
+```
+
+
+## Remove baseline values using the ambient data
+```{r}
+# Find where ambient exercise locate in the JSON file
+line3 = grep("ambient", unlist(session))
+# The next line is the time information
+ambient_start_end = as.numeric(unlist(session)[line3 - 1])
+
+
+colMeans(ambient[-1])
+plot2(ambient, name = "ambient")
+```
+
+
+```{r}
+change = baseline(squeeze_and_hold, first3seconds)
+plot2(change, name = "Squeeze and hold (baseline removed)")
+
+#ggsave("Squeeze and hold.png", height = 8, width = 16)
+```
+
+
+
