@@ -131,7 +131,7 @@ getrectime = function(folder, exercise){
 
 
 ###### A function of subsetting data for a given time
-getsubdata = function(data, start, stop){
+getsubdata = function(data, start = min(data$rectime), stop = max(data$rectime)){
   
   if (start < min(data$rectime)){
     stop(paste0("Sorry, data missing for recording time before ", min(data$rectime), " s."))
@@ -203,7 +203,7 @@ plot2 = function(data, name = NULL){
     ggplot(aes(x = rectime, y = pressure, 
                group = sensor, color = sensor)) +
     geom_line(position = position_dodge(width = 0.2)) +
-    labs(x = "Recording Time (in ms)", y = "Pressure (in mmHg)",
+    labs(x = "Recording Time (ms)", y = "Pressure (mmHg)",
          title = paste("Pressure trace from", name),
          caption = description) +   
     scale_color_brewer(palette = "Set1") + 
@@ -212,7 +212,7 @@ plot2 = function(data, name = NULL){
 }
 
 
-###### A function to mutate a pressure `change` column
+###### A function to remove baseline values
 
 baseline = function(data, relaxdata){
   newdata = sweep(data[-1], 2, colMeans(relaxdata[-1]))
@@ -222,7 +222,7 @@ baseline = function(data, relaxdata){
 
 
 ###### A run-everything process function - return the a list of 2 pfmc datasets (1 original, 1 change)
-process = function(folder){
+process = function(folder, whole = NULL){
   # Get the data
   whole = read.csv(list.files(path = folder, pattern = ".csv", recursive = TRUE, full.names = TRUE))
   
@@ -246,7 +246,6 @@ process = function(folder){
   # Get pfmc data
   pfmcdata = getsubdata(data, rectime[[1]], rectime[[2]])
   
- 
   # Get the resting period - stable data
   attempt3 = getsubdata(data, rectime[[1]], rectime[[1]] + 15000)
   
