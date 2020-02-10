@@ -225,17 +225,33 @@ greedy.fit
 
 ## For whole data (8 sensors) - Back to our original data
 ```{r}
-mypoints = greedy.fit
+# Exclude the first 2 rise (4 points)
+mypoints = greedy.fit[5:(length(greedy.fit))]
 n_squeeze_and_hold = 20
 
 ```
 
 ## Just double check if we actually get the changepoints right (can manually modify a bit here if needed)
 ```{r}
-squeeze_and_hold_start = seq(3, n_squeeze_and_hold+2, 1)*2-1
+squeeze_and_hold_start = seq(1, n_squeeze_and_hold, 1)*2 - 1
 
-# Shift the starting time of each contraction in exercise `Squeeze and hold` 10 points forward (so the graph looks nicer)
-mypoints[squeeze_and_hold_start] = mypoints[squeeze_and_hold_start] - 10
+squeeze_and_hold_end = seq(1, n_squeeze_and_hold, 1)*2
+
+# Shift the starting time of each contraction(except no.14) in exercise `Squeeze and hold` 30 points to the left (so the graph looks nicer)
+mypoints[squeeze_and_hold_start[-14]] = mypoints[squeeze_and_hold_start[-14]] - 30
+
+# Shift the ending time of contraction no.14 in exercise `Squeeze and hold` 30 points to the right (so the graph looks nicer)
+mypoints[squeeze_and_hold_end[14]] = mypoints[squeeze_and_hold_end[14]] + 30
+
+# Shift the starting time of `endurance` 30 points to the left (so the graph looks nicer)
+mypoints[51] = mypoints[51] - 50
+
+# Shift the starting time of `endurance` 30 points to the left (so the graph looks nicer)
+mypoints[49] = mypoints[49] - 70
+
+# Shift the starting time of `endurance` 30 points to the left (so the graph looks nicer)
+mypoints[c(50, 52)] = mypoints[c(50, 52)] + 50
+
 
 start.end.rectime = change$rectime[mypoints] 
 
@@ -244,10 +260,10 @@ plot2(change) + theme_void() +
 
 ```
 
-## Let's have a look at each individual event(could be a contraction/fast rapid/knack/endurance) !!!!
+## Let's have a look at each individual event(could be a PFMC/fast rapids/knack/endurance) !!!!
 
 ```{r}
-for (i in 1:n_peaks) {
+for (i in 1:(n_peaks-2)) {
   start = start.end.rectime[i*2 - 1]
   end = start.end.rectime[i*2]
   
@@ -256,8 +272,8 @@ for (i in 1:n_peaks) {
           theme_classic() + 
           theme(axis.text = element_text(face = "bold", size = 14),
                 axis.title = element_text(face = "bold", size = 14)))
-  
-  #ggsave(paste0("Contraction No.", i, ".png"), height = 5, width = 8)
+
+  #ggsave(paste0("Event No.", i, ".png"), height = 5, width = 8)
 }
 
 
