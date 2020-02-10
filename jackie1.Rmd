@@ -69,7 +69,7 @@ lapply(df.list, plot2)
 ### Comments: Seems like Squeeze and Hold data is located in df1 to df5. We can combine everything first and then maunally segement `Squeeze and hold` exercise out.
 
 
-### Mutate new column rectime (recording time) after combining all data frames 
+### Mutate new column rectime (recording time) after combining all data frames NOTE: the time gap is 25 ms
 ```{r}
 whole = do.call("rbind", df.list)
 rownames(whole) = 1:nrow(whole)
@@ -198,7 +198,7 @@ text(top_n_peaks[, 2] + 300, top_n_peaks[, 1] + 2, as.character(top_n_peaks[, 2]
 ### Greedy method ###
 #### Trying to get  `n_peaks*2` change points at once using Binary Segementation
 ```{r}
-all.binseg = cpt.mean(smoothed.peak.df$peak, method = "BinSeg", Q = (n_peaks-2)*2)
+all.binseg = cpt.mean(smoothed.peak.df$peak, method = "BinSeg", Q = n_peaks*2-4)
 greedy.fit = cpts(all.binseg)
 ```
 
@@ -245,6 +245,7 @@ plot2(change) + theme_void() +
 
 ```
 
+## Let's have a look at each individual event (just in squeeze and hold & the knack) !!!!
 
 ```{r}
 for (i in 1:(n_peaks-6)) {
@@ -253,12 +254,27 @@ for (i in 1:(n_peaks-6)) {
   
 
   print(myplot(getsubdata(change, start, end), name = paste0("Event No.", i)) + 
-          theme_classic())
-  #         theme(axis.text = element_text(face = "bold", size = 14),
-  #               axis.title = element_text(face = "bold", size = 14)))
-  # 
-  #ggsave(paste0("Contraction No.", i, ".png"), height = 5, width = 8)
+          theme_classic() +
+          theme(axis.text = element_text(face = "bold", size = 14),
+                axis.title = element_text(face = "bold", size = 14)))
+
+  #ggsave(paste0("Event No.", i, ".png"), height = 5, width = 8)
 }
 
+```
 
+
+
+
+
+
+
+### Rapids and Endurance
+```{r}
+
+where_rapids_end = mypoints[length(mypoints)]
+
+rapids_and_endurance = getsubdata(change, start = change$rectime[where_rapids_end], stop = max(change$rectime))
+
+plot2(rapids_and_endurance, name = "Rapids and Endurance")
 ```
