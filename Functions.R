@@ -61,7 +61,7 @@ get_id_list = function(folder){
 
 ###### A function that obtain the description for a rough input exercise name (id)
 get_description = function(id){
-  # Choose a random(the first one) folder in the current wd
+  # Choose a random(the first one) folder in the current wd (not a good idea)
   folder = list.files(pattern = "_csv")[1]
   
   id_list = get_id_list(folder)
@@ -70,7 +70,7 @@ get_description = function(id){
   }
   # Get rid of info (.participantid) after "."
   if (length(strsplit(id, "\\.")[[1]]) > 1) {
-    description = "Maximum PFM Contration for 5s."
+    description = "Maximum PFM Contration for 5-8 seconds."
   }
   
   else {
@@ -182,8 +182,7 @@ myplot = function(data, name = NULL) {
     scale_x_discrete(limits = seq(0, round(max(data$time)/1000) * 1000, gap), 
                      labels = seq(0, round(max(data$time)/1000), gap/1000)) +
     labs(x = "Time (s)", y = "Pressure (mmHg)",
-         title = paste("Pressure trace from", name),
-         caption = description)  +
+         title = paste("Pressure trace from", name)) +
     scale_color_brewer(palette = "Set1") + 
     guides(color = guide_legend(override.aes = list(size = 5)))
   
@@ -204,8 +203,7 @@ plot2 = function(data, name = NULL){
                group = sensor, color = sensor)) +
     geom_line(position = position_dodge(width = 0.2)) +
     labs(x = "Recording Time (ms)", y = "Pressure (mmHg)",
-         title = paste("Pressure trace from", name),
-         caption = description) +   
+         title = paste("Pressure trace from", name)) +   
     scale_color_brewer(palette = "Set1") + 
     guides(color = guide_legend(override.aes = list(size = 5)))
   
