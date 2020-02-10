@@ -2,7 +2,8 @@
 .Rhistory
 *.RData
 .Ruserdata
-PeakPFMCCompare.xlsx
-ssResearch/**/*.png
-ssResearch/**/*.csv
 *.png
+*.csv
+*.data
+*.json
+*.xlsx
