@@ -192,25 +192,25 @@ greedy.fit
 # Let's ignore the endurance and the knack for now (the last 8 changepoints excluded)
 mypoints = greedy.fit[1:(length(greedy.fit)-8)]
 
-n_squeeze_and_hold = 22
+n_event = 22
 ```
 
 ## Just double check if we actually get the changepoints right (can manually modify a bit here if needed)
 ```{r}
 
-squeeze_and_hold_start = seq(1, n_squeeze_and_hold, 1)*2 - 1
+event_start = seq(1, n_event, 1)*2 - 1
 
-squeeze_and_hold_end = seq(1, n_squeeze_and_hold, 1)*2
+event_end = seq(1, n_event, 1)*2
 
 # Shift the ending time of all pfmcs in exercise`Squeeze and hold` 30 points to the right (so the graph looks nicer)
-mypoints[squeeze_and_hold_end] = mypoints[squeeze_and_hold_end] + 30
+mypoints[event_end] = mypoints[event_end] + 30
 
 
 # Shift the starting time of all pfmcs in exercise `Squeeze and hold` 30 points to the left (so the graph looks nicer)
-mypoints[squeeze_and_hold_start] = mypoints[squeeze_and_hold_start] - 30
+mypoints[event_start] = mypoints[event_start] - 30
 
 # Shift the starting time of pfmc no.13 in exercise`Squeeze and hold` 30 points to the left again (so the graph looks nicer)
-mypoints[squeeze_and_hold_start[13]] = mypoints[squeeze_and_hold_start[13]] - 30
+mypoints[event_start[13]] = mypoints[event_start[13]] - 30
 
 start.end.rectime = change$rectime[mypoints] 
 
@@ -222,21 +222,56 @@ plot2(change) + theme_void() +
 ## Let's have a look at each individual event (just in squeeze and hold & rapids) !!!!
 
 ```{r}
+contraction.data = list()
+
 for (i in 1:22) {
   start = start.end.rectime[i*2 - 1]
   end = start.end.rectime[i*2]
   
-
+  if (i <= 20){
+    contraction.data[[i]] = getsubdata(change, start, end)
+  }
+  
   print(myplot(getsubdata(change, start, end), name = paste0("Event No.", i)) + 
-          theme_classic() + 
-          theme(axis.text = element_text(face = "bold", size = 14),
-                axis.title = element_text(face = "bold", size = 14)))
+          theme_classic()) 
+          # theme(axis.text = element_text(face = "bold", size = 14),
+          #       axis.title = element_text(face = "bold", size = 14)))
   
   #ggsave(paste0("Event No.", i, ".png"), height = 5, width = 8)
 }
 
 
 ```
+
+### Mutate a new column `contration id` for each contraction data, then combine all together
+```{r}
+for (i in 1:length(contraction.data)) {
+  contraction.data[[i]] = contraction.data[[i]] %>% 
+    mutate(contraction = as.factor(i))
+}
+
+contraction.df = do.call("rbind", contraction.data)
+head(contraction.df)
+```
+
+### Task: Averaging the peaks for each sensor !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+```{r}
+avged.df = contraction.df %>% 
+  tidy() %>% 
+  group_by(contraction, sensor) %>% 
+  summarise(mean = mean(pressure), sd = sd(pressure, na.rm = TRUE))
+
+ggplot(data = avged.df, aes(x = contraction, y = mean, group = sensor, color = sensor)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = 0.2) +
+  labs(title = "Mean Pressure over contraction", y = "Mean pressure (mmHg)", x = "Contraction") +
+  theme_classic() +
+  scale_color_brewer(palette = "Set1")
+```
+
+
+
 
 
 ### Endurance and the knack
