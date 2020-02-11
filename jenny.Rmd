@@ -191,6 +191,7 @@ greedy.fit
 
 # Let's ignore the endurance and the knack for now (the last 8 changepoints excluded)
 mypoints = greedy.fit[1:(length(greedy.fit)-8)]
+raw.start.end.rectime = change$rectime[mypoints] 
 
 n_event = 22
 ```
@@ -220,20 +221,39 @@ plot2(change) + theme_void() +
 ```
 
 ## Let's have a look at each individual event (just in squeeze and hold & rapids) !!!!
-
 ```{r}
-contraction.data = list()
-
 for (i in 1:22) {
   start = start.end.rectime[i*2 - 1]
   end = start.end.rectime[i*2]
   
+print(myplot(getsubdata(change, start, end), name = paste0("Event No.", i)) + 
+          theme_classic())
+          # theme(axis.text = element_text(face = "bold", size = 14),
+          #       axis.title = element_text(face = "bold", size = 14)))
+  
+  #ggsave(paste0("Event No.", i, ".png"), height = 5, width = 8)
+}
+
+```
+
+
+
+### Averaging each contraction for each sensor
+```{r}
+contraction.data = list()
+
+for (i in 1:22) {
+  # start = start.end.rectime[i*2 - 1]
+  # end = start.end.rectime[i*2]
+  
   if (i <= 20){
-    contraction.data[[i]] = getsubdata(change, start, end)
+    contraction.data[[i]] = getsubdata(change, raw.start.end.rectime[i*2 - 1] + 1000, raw.start.end.rectime[i*2] - 500)
+    print(myplot(contraction.data[[i]], name = paste0("Contraction No.", i)) + 
+          theme_classic())
   }
   
-  print(myplot(getsubdata(change, start, end), name = paste0("Event No.", i)) + 
-          theme_classic()) 
+  #print(myplot(getsubdata(change, start, end), name = paste0("Event No.", i)) + 
+          #theme_classic()) 
           # theme(axis.text = element_text(face = "bold", size = 14),
           #       axis.title = element_text(face = "bold", size = 14)))
   
@@ -262,8 +282,7 @@ avged.df = contraction.df %>%
   summarise(mean = mean(pressure), sd = sd(pressure, na.rm = TRUE))
 
 ggplot(data = avged.df, aes(x = contraction, y = mean, group = sensor, color = sensor)) +
-  geom_line(size = 1) +
-  geom_point(size = 2) +
+  geom_point(size = 5) +
   geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = 0.2) +
   labs(title = "Mean Pressure over contraction", y = "Mean pressure (mmHg)", x = "Contraction") +
   theme_classic() +
