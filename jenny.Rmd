@@ -241,26 +241,11 @@ print(myplot(getsubdata(change, start, end), name = paste0("Event No.", i)) +
 ### Averaging each contraction for each sensor
 ```{r}
 contraction.data = list()
-
-for (i in 1:22) {
-  # start = start.end.rectime[i*2 - 1]
-  # end = start.end.rectime[i*2]
-  
-  if (i <= 20){
+for (i in 1:20) {
     contraction.data[[i]] = getsubdata(change, raw.start.end.rectime[i*2 - 1] + 1000, raw.start.end.rectime[i*2] - 500)
     print(myplot(contraction.data[[i]], name = paste0("Contraction No.", i)) + 
           theme_classic())
   }
-  
-  #print(myplot(getsubdata(change, start, end), name = paste0("Event No.", i)) + 
-          #theme_classic()) 
-          # theme(axis.text = element_text(face = "bold", size = 14),
-          #       axis.title = element_text(face = "bold", size = 14)))
-  
-  #ggsave(paste0("Event No.", i, ".png"), height = 5, width = 8)
-}
-
-
 ```
 
 ### Mutate a new column `contration id` for each contraction data, then combine all together
