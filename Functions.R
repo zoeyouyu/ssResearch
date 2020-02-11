@@ -121,12 +121,14 @@ getrectime = function(folder, exercise){
   # Get the pfmc exercise start and stop timestamps
   exercise_start = session$exercises[[order]]$start
   exercise_stop = session$exercises[[order]]$stop
+  next_one_start = session$exercises[[order+1]]$start
   
   # Subtract the initial recording start timestamp to get the approximate time
   exercise_start_time = round((exercise_start - start) / 10) * 10
   exercise_stop_time = round((exercise_stop - start) / 10) * 10
+  next_one_start_time = round((next_one_start - start) / 10) * 10
   
-  list(exercise_start_time, exercise_stop_time)
+  list(exercise_start_time, exercise_stop_time, next_one_start_time)
 }
 
 
@@ -237,12 +239,12 @@ process = function(folder, whole = NULL){
   
   data = whole %>% select(-(t1:t8))
 
-  # Get the start/end time of the pfmc exercise
+  # Get the start/end time of the pfmc exercise, and the start time for next exercise
   name = "pfmc"
   rectime = getrectime(folder, name)
   
   # Get pfmc data
-  pfmcdata = getsubdata(data, rectime[[1]], rectime[[2]])
+  pfmcdata = getsubdata(data, rectime[[1]], rectime[[3]])
   
   # Get the resting period - stable data
   attempt3 = getsubdata(data, rectime[[1]], rectime[[1]] + 15000)
@@ -251,7 +253,7 @@ process = function(folder, whole = NULL){
   newdata = baseline(data, attempt3)
   
   # Subset the pfmc data
-  pfmcchange = getsubdata(newdata, rectime[[1]], rectime[[2]])
+  pfmcchange = getsubdata(newdata, rectime[[1]], rectime[[3]])
   
   # Retutn the whole dataset, pfmc dataset, one original, one change
   datalist = list(data, newdata, pfmcdata, pfmcchange)
