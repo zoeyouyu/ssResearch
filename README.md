@@ -1,4 +1,4 @@
-## Under pressure - A visual approach.  
+## Under pressure - A visual approach
 
 Doing pelvic floor muscle contraction (PFMC) exercise is an effective way to train pelvic floor muscles (PFM) and to treat stress urinary incontinence in women.
 
