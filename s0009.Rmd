@@ -69,32 +69,20 @@ summary(pfmcdata$isna)
 Apparently, we have 90 missing values. But so far, it does not affect our plotting.
 
 ### For PFMC change data, we wanna dive closer to see each contraction
-### To get smoothed.df to reduce the effect of noise (the smoothed line captures the pattern of trace fairly well)
+### To get smoothed.peak.df to reduce the effect of noise (the smoothed line captures the pattern of trace fairly well)
+
+## Get the peak pressure values
 ```{r}
 change = df.list[[4]]
-change$id = 1:nrow(change)
-
-
-change$time = change$rectime - min(change$rectime)
+change$peak = apply(change[, 1:8], 1, max)
 ```
 
-## Clean out the problem noisy data
-```{r}
-problem = change %>% filter(change$rectime > min(change$rectime) + 24000,
-                  change$rectime < min(change$rectime) + 30000)
-
-
-change[problem$id, 1:8] = 0
-
-
-myplot(change)
-```
-
+## Smooth the peak  `span` is really important here!!!!!!!!!!
 
 ```{r}
 tidydata = tidy(change)
-lo.whole = loess(pressure ~ rectime, data = tidydata, span = 0.1)
-plot(tidydata$rectime, tidydata$pressure, pch = 21, cex = 0.5)
+lo.whole = loess(peak ~ rectime, data = tidydata, span = 0.1)
+plot(tidydata$rectime, tidydata$peak, pch = 21, cex = 0.5)
 
 lines(tidydata$rectime[order(tidydata$rectime)],
       predict(lo.whole)[order(tidydata$rectime)],
@@ -102,152 +90,162 @@ lines(tidydata$rectime[order(tidydata$rectime)],
 ```
 
 
-```{r}
-# Get smoothed.df
-smoothed.df = unique(data.frame(rectime = tidydata$rectime[order(tidydata$rectime)], 
-                            pressure = predict(lo.whole)[order(tidydata$rectime)]))
-smoothed.df$id = 1:nrow(smoothed.df)
 
-# Plot the smooth line
+
+```{r}
+# Get smoothed.peak.df
+smoothed.peak.df = unique(data.frame(rectime = tidydata$rectime[order(tidydata$rectime)], 
+                            peak = predict(lo.whole)[order(tidydata$rectime)]))
+smoothed.peak.df$id = 1:nrow(smoothed.peak.df)
+
+# Plot the smoothed peak line
 ggplot(data = tidydata) +
   geom_line(aes(x = rectime, y = pressure, color = sensor)) +
-  geom_line(data = smoothed.df, aes(x = rectime, y = pressure), size = 1) +
+  geom_line(data = smoothed.peak.df, aes(x = rectime, y = peak), size = 1) +
   labs(x = "Recording Time (in s)", y = "Pressure Change (in mm Hg)",
-       title = "Pressure trace from all sensors with smoothed line") +
+       title = "Pressure trace from all sensors with smoothed line of peak") + 
+    scale_color_brewer(palette = "Set1") + 
   guides(color = guide_legend(override.aes = list(size = 5)))
 
-#ggsave("Colored Pressure traces with Smoothed Line.png", width = 10, height = 4)
 ```
 
+
+#### Get the top n peaks.
+
+## Before calling `findpeaks` function, set a threshold called noise to be ignored (not picked up as a peak - a potential event)
 ```{r}
-# Get the baseline noise
-noise = smoothed.df %>% 
-  filter(rectime < min(rectime + 15000)) %>%
+# Get the baseline noise from the first 15 seconds of data
+noise = change %>% 
+  tidy() %>%
+  filter(rectime < (min(change$rectime) + 15000)) %>%
   summarise(maxdiff = max(pressure) - min(pressure)) %>%
   as.numeric()
+
+change %>%
+  filter(rectime < (min(change$rectime) + 15000)) %>% plot2()
 ```
 
 
-### Use the non-greedy (Patience is virtue) method to find 6 change points
+#### Note: changed minpeakdistane to 500 !!!!! Depends on the participant (time interval between contractions varies!!!!!!!!!!)
 ```{r}
-#### Get the top 3 peaks first. 
-top_3_peaks = findpeaks(smoothed.df$pressure, minpeakdistance = 500, minpeakheight = noise)
-top_3_peaks_indices = sort(top_3_peaks[, 2])
-plot(smoothed.df$pressure, type = "l")
-points(top_3_peaks[, 2], top_3_peaks[, 1], pch = 15, col = "red")
-text(top_3_peaks[, 2] + 250, top_3_peaks[, 1], as.character(top_3_peaks[, 2]))
-```
+top_n_peaks = findpeaks(smoothed.peak.df$peak, minpeakdistance = 500, minpeakheight = noise)
+top_n_peaks_indices = sort(top_n_peaks[, 2])
 
-
-#### Segment1 is from the start to the 1st peak. Return the 1st peak start point. (point 1)
-```{r}
-seg1.test = cpt.meanvar(smoothed.df[1:top_3_peaks_indices[1], "pressure"])
-point1 = cpts(seg1.test)
-plot(seg1.test)
-text(cpts(seg1.test), 0, cpts(seg1.test), font = 2)
-```
-#### Segment2 is from point1 to the 2nd peak. Return the 1st peak end point. (point 2)
-
-#### Need to change the x axis
-```{r}
-seg2.test = cpt.mean(smoothed.df[point1:top_3_peaks_indices[2], "pressure"])
-point2 = point1 + cpts(seg2.test)
-plot(seg2.test)
-text(cpts(seg2.test), 0, point2, font = 2)
-```
-#### Segment3 is from point2 to 2nd peak. Return the 2nd peak start point. (point 3)
-
-#### Need to change the x axis
-```{r}
-seg3.test = cpt.meanvar(smoothed.df[point2:top_3_peaks_indices[2], "pressure"])
-point3 = point2 + cpts(seg3.test)
-plot(seg3.test)
-text(cpts(seg3.test), 0, point3, font = 2)
-```
-
-#### Segment4 is from point3 to 3rd peak. Return the 2nd peak end point. (point 4)
-
-#### Need to change the x axis
-```{r}
-seg4.test = cpt.meanvar(smoothed.df[point3:top_3_peaks_indices[3], "pressure"])
-point4 = point3 + cpts(seg4.test)
-plot(seg4.test)
-text(cpts(seg4.test), 1.5, point4, font = 2)
-```
-
-#### Segment5 is from point4 to 3rd peak. Return the 3rd peak start point. (point 5)
-
-#### Need to change the x axis
-```{r}
-seg5.test = cpt.meanvar(smoothed.df[point4:top_3_peaks_indices[3], "pressure"])
-point5 = point4 + cpts(seg5.test)
-plot(seg5.test)
-text(cpts(seg5.test), 0.5, point5, font = 2)
-```
-
-#### Segment6 is from point5 to the end. Return the 3rd peak end point. (point 6)
-
-#### Need to change the x axis
-```{r}
-seg6.test = cpt.mean(smoothed.df[point5:nrow(smoothed.df), "pressure"])
-
-point6 = ifelse(length(cpts(seg6.test)) == 0, nrow(data), cpts(seg6.test)+point5)
-print(ifelse(length(cpts(seg6.test)) == 0, "We don't have point 6", paste("We have Point 6 at", point6)))
+### Check how many peaks we got
+(n_peaks = length(top_n_peaks_indices))
 ```
 
 
 ```{r}
-plot(seg6.test)
-text(cpts(seg6.test), 2, point6, font = 2)
+plot(smoothed.peak.df$peak, type = "l")
+points(top_n_peaks[, 2], top_n_peaks[, 1], pch = 15, col = "red")
+text(top_n_peaks[, 2] + 300, top_n_peaks[, 1], as.character(top_n_peaks[, 2]))
+```
+
+### Greedy method ###
+#### Trying to get  `n_peaks*2` change points at once using Binary Segementation, manually choose Q = 6
+
+```{r}
+all.binseg = cpt.mean(smoothed.peak.df$peak, method = "BinSeg", Q = 6)
+plot(all.binseg)
+```
+
+
+
+### Doing pretty well!!!!!!!!!! Good job greedy!!!!
+
+```{r}
+(greedy.fit = cpts(all.binseg))
 ```
 
 
 ## For whole data (8 sensors) - Back to our original data
 ```{r}
-mypoints = c(point1, point2, point3, point4, point5, point6)
-                
-mypoints[1] = mypoints[1] + 40
-mypoints[2] = mypoints[2] + 50
+mypoints = greedy.fit
+n_PFMC = 3
+raw.start.end.rectime = change$rectime[mypoints] 
 
-mypoints[5] = mypoints[5] - 50
+```
 
+## Just double check if we actually get the changepoints right (can manually modify a bit here if needed)
+```{r}
+pfmc_start = seq(1, n_PFMC, 1)*2 - 1
 
-start.end.rectime = smoothed.df$rectime[mypoints] 
+pfmc_end = seq(1, n_PFMC, 1)*2
 
-ggplot(data = tidydata) +
-  geom_line(aes(x = rectime, y = pressure, color = sensor)) +
+# Shift the ending time of contraction no.1, 50 points to the right (so the graph looks nicer)
+mypoints[pfmc_end[1]] = mypoints[pfmc_end[1]] + 100
+
+# Shift the starting time of contraction no.2 and no.3, 50 points to the left (so the graph looks nicer)
+mypoints[pfmc_start[2:3]] = mypoints[pfmc_start[2:3]] - 100
+
+start.end.rectime = change$rectime[mypoints] 
+
+plot2(change) + theme_void() +
   geom_vline(xintercept = start.end.rectime)
 
 ```
 
-## Let's have a look at each individual contraction !!!!
+## Let's have a look at each individual event (a PFMC) !!!!
 
 ```{r}
-#babyplots.p3 = list()
-for (i in 1:3) {
+for (i in 1:n_PFMC) {
   start = start.end.rectime[i*2 - 1]
   end = start.end.rectime[i*2]
   
-  # Each contraction original
-  #print(myplot(getsubdata(data, start, end), name = names(df.list)[4]) + 
-          #labs(subtitle = paste0("pfmc no.", i)) + theme_classic())
-
-  # Each contraction baseline removed
-  #babyplots.p3[[i]] = myplot(getsubdata(df.list[[4]], start, end)) + theme_classic()
-  print(myplot(getsubdata(df.list[[4]], start, end), name = paste0("Contraction No.", i)) + 
-          theme_classic() + 
-          theme(axis.text = element_text(face = "bold", size = 14),
-                axis.title = element_text(size = 20, face = "bold")))
-  #ggsave(paste0("Contraction No.", i, ".png"), height = 5, width = 8)
+print(myplot(getsubdata(change, start, end), name = paste0("PFMC No.", i)) + 
+          theme_classic())
+          # theme(axis.text = element_text(face = "bold", size = 14),
+          #       axis.title = element_text(face = "bold", size = 14)))
+  
+  #ggsave(paste0("Event No.", i, ".png"), height = 5, width = 8)
 }
 
 ```
 
 
+### Dropping the starting (1s) and ending (2s) baseline data for each contraction
+```{r}
+contraction.data = list()
+for (i in 1:n_PFMC) {
+    contraction.data[[i]] = getsubdata(change, start.end.rectime[i*2 - 1] + 1000, start.end.rectime[i*2] - 2000)
+    print(myplot(contraction.data[[i]], name = paste0("Contraction No.", i)) + 
+          theme_classic())
+  }
+```
 
 
 
+### Mutate a new column `contration id` for each contraction data, then combine all together
+```{r}
+for (i in 1:length(contraction.data)) {
+  contraction.data[[i]] = contraction.data[[i]] %>% 
+    mutate(contraction = as.factor(i))
+}
+
+contraction.df = do.call("rbind", contraction.data)
+head(contraction.df)
+```
+
+### Averaging each contraction for each sensor
+
+```{r}
+avged.df = contraction.df %>% 
+  tidy() %>% 
+  group_by(contraction, sensor) %>% 
+  summarise(mean = mean(pressure), sd = sd(pressure, na.rm = TRUE))
+
+ggplot(data = avged.df, aes(x = contraction, y = mean, group = sensor, color = sensor)) +
+  geom_point(size = 5) +
+  geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = 0.2) +
+  labs(title = "Mean Pressure over contraction", y = "Mean pressure (mmHg)", x = "Contraction",
+       subtitle = "Participant s0007") +
+  theme_classic() +
+  scale_color_brewer(palette = "Set1")
 
 
+#ggsave("Mean pressure for each sensor over contraction.png", width = 10, height = 5)
+
+```
 
 

@@ -144,7 +144,7 @@ text(top_n_peaks[, 2] + 300, top_n_peaks[, 1], as.character(top_n_peaks[, 2]))
 ```
 
 ### Greedy method ###
-#### Trying to get  `n_peaks*2` change points at once using Binary Segementation
+#### Trying to get  `n_peaks*2` change points at once using Binary Segementation, manually choose Q = 10
 
 ```{r}
 all.binseg = cpt.mean(smoothed.peak.df$peak, method = "BinSeg", Q = 10)
@@ -165,6 +165,7 @@ plot(all.binseg)
 ## Only taking the 6 points we want
 mypoints = greedy.fit[c(1, 3, 4, 6, 7, 8)]
 n_PFMC = 3
+raw.start.end.rectime = change$rectime[mypoints] 
 
 ```
 
@@ -194,24 +195,57 @@ for (i in 1:n_PFMC) {
   start = start.end.rectime[i*2 - 1]
   end = start.end.rectime[i*2]
   
-
-  print(myplot(getsubdata(change, start, end), name = paste0("PFMC No.", i))  +
-          theme_classic() + 
-          theme(axis.text = element_text(face = "bold", size = 14),
-                axis.title = element_text(face = "bold", size = 14)))
-
-  #ggsave(paste0("PFMC No.", i, ".png"), height = 5, width = 8)
+print(myplot(getsubdata(change, start, end), name = paste0("PFMC No.", i)) + 
+          theme_classic())
+          # theme(axis.text = element_text(face = "bold", size = 14),
+          #       axis.title = element_text(face = "bold", size = 14)))
+  
+  #ggsave(paste0("Event No.", i, ".png"), height = 5, width = 8)
 }
 
 ```
 
 
-
-
-
-### Task: Averaging the peaks for each sensor !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#### Contraction NO.1
+### Dropping the starting (0.5s) and ending (0.5s) baseline data for each contraction
 ```{r}
-
+contraction.data = list()
+for (i in 1:n_PFMC) {
+    contraction.data[[i]] = getsubdata(change, raw.start.end.rectime[i*2 - 1] + 1000, raw.start.end.rectime[i*2] - 1000)
+    print(myplot(contraction.data[[i]], name = paste0("Contraction No.", i)) + 
+          theme_classic())
+  }
 ```
 
+
+
+### Mutate a new column `contration id` for each contraction data, then combine all together
+```{r}
+for (i in 1:length(contraction.data)) {
+  contraction.data[[i]] = contraction.data[[i]] %>% 
+    mutate(contraction = as.factor(i))
+}
+
+contraction.df = do.call("rbind", contraction.data)
+head(contraction.df)
+```
+
+### Averaging each contraction for each sensor
+
+```{r}
+avged.df = contraction.df %>% 
+  tidy() %>% 
+  group_by(contraction, sensor) %>% 
+  summarise(mean = mean(pressure), sd = sd(pressure, na.rm = TRUE))
+
+ggplot(data = avged.df, aes(x = contraction, y = mean, group = sensor, color = sensor)) +
+  geom_point(size = 5) +
+  geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = 0.2) +
+  labs(title = "Mean Pressure over contraction", y = "Mean pressure (mmHg)", x = "Contraction",
+       subtitle = "Participant s0007") +
+  theme_classic() +
+  scale_color_brewer(palette = "Set1")
+
+
+#ggsave("Mean pressure for each sensor over contraction.png", width = 10, height = 5)
+
+```
