@@ -221,7 +221,10 @@ greedy.fit
 
 ## For whole data (8 sensors) - Back to our original data
 ```{r}
+# Let's ignore the last two exercises for now (the last 8 changepoints excluded)
 mypoints = greedy.fit[1:(length(greedy.fit)-8)]
+raw.start.end.rectime = change$rectime[mypoints] 
+
 n_squeeze_and_hold = 20
 
 ```
@@ -266,9 +269,47 @@ for (i in 1:(n_peaks-6)) {
 
 
 
+### Dropping the starting (1s) and ending (0.5s) baseline data fro each contraction
+```{r}
+contraction.data = list()
+for (i in 1:20) {
+    contraction.data[[i]] = getsubdata(change, raw.start.end.rectime[i*2 - 1] + 1000, raw.start.end.rectime[i*2] - 500)
+    print(myplot(contraction.data[[i]], name = paste0("Contraction No.", i)) + 
+          theme_classic())
+  }
+```
 
 
+### Mutate a new column `contration id` for each contraction data, then combine all together
+```{r}
+for (i in 1:length(contraction.data)) {
+  contraction.data[[i]] = contraction.data[[i]] %>% 
+    mutate(contraction = as.factor(i))
+}
 
+contraction.df = do.call("rbind", contraction.data)
+head(contraction.df)
+```
+
+### Averaging each contraction for each sensor
+
+```{r}
+avged.df = contraction.df %>% 
+  tidy() %>% 
+  group_by(contraction, sensor) %>% 
+  summarise(mean = mean(pressure), sd = sd(pressure, na.rm = TRUE))
+
+ggplot(data = avged.df, aes(x = contraction, y = mean, group = sensor, color = sensor)) +
+  geom_point(size = 5) +
+  geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = 0.2) +
+  labs(title = "Mean Pressure over contraction", y = "Mean pressure (mmHg)", x = "Contraction",
+       subtitle = "Jackie session 35") +
+  theme_classic() +
+  scale_color_brewer(palette = "Set1")
+
+##ggsave("Mean pressure for each sensor over contraction.png", width = 10, height = 5)
+
+```
 ### Rapids and Endurance
 ```{r}
 

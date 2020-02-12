@@ -238,7 +238,7 @@ print(myplot(getsubdata(change, start, end), name = paste0("Event No.", i)) +
 
 
 
-### Averaging each contraction for each sensor
+### Dropping the starting (1s) and ending (0.5s) baseline data for each contraction
 ```{r}
 contraction.data = list()
 for (i in 1:20) {
@@ -259,7 +259,8 @@ contraction.df = do.call("rbind", contraction.data)
 head(contraction.df)
 ```
 
-### Task: Averaging the peaks for each sensor !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+### Averaging each contraction for each sensor
+
 ```{r}
 avged.df = contraction.df %>% 
   tidy() %>% 
@@ -269,9 +270,14 @@ avged.df = contraction.df %>%
 ggplot(data = avged.df, aes(x = contraction, y = mean, group = sensor, color = sensor)) +
   geom_point(size = 5) +
   geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = 0.2) +
-  labs(title = "Mean Pressure over contraction", y = "Mean pressure (mmHg)", x = "Contraction") +
+  labs(title = "Mean Pressure over contraction", y = "Mean pressure (mmHg)", x = "Contraction",
+       subtitle = "Jenny") +
   theme_classic() +
   scale_color_brewer(palette = "Set1")
+
+
+#ggsave("Mean pressure for each sensor over contraction.png", width = 10, height = 5)
+
 ```
 
 
