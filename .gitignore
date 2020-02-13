@@ -3,7 +3,3 @@
 *.RData
 .Ruserdata
 *.png
-*.csv
-*.data
-*.json
-*.xlsx
