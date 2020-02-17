@@ -1,0 +1,133 @@
+{
+  "endDay" : 76,
+  "startDay" : 70,
+  "workoutId" : "12week_week11",
+  "prompts" : [
+    [
+      {
+        "message" : "This week we are aiming for 10 good reps.",
+        "when" : 3,
+        "duration" : 5
+      },
+      {
+        "message" : "Almost there!",
+        "when" : 600,
+        "duration" : 5
+      }
+    ],
+    [
+
+    ],
+    [
+
+    ],
+    [
+      {
+        "message" : "Cough when you see the <COUGH> symbol.",
+        "when" : 0.5,
+        "duration" : 8
+      }
+    ]
+  ],
+  "position" : "standing or with legs apart",
+  "workoutName" : "Week 11",
+  "workoutDescription" : "Week 11 - All exercises should be performed standing or with legs apart.",
+  "exerciseSteps" : [
+    {
+      "id" : "pfmc_10x10s_rest10s_3sets",
+      "sets" : 3,
+      "reps" : 10,
+      "specialSymbols" : [
+
+      ],
+      "restBetweenSets" : 10,
+      "description" : "Squeeze and Hold",
+      "completed" : true,
+      "actions" : [
+        {
+          "bitDescriptor" : "pfmc",
+          "strength" : 1,
+          "holdDuration" : 10,
+          "restDuration" : 10
+        }
+      ],
+      "name" : "Squeeze and Hold"
+    },
+    {
+      "id" : "rapid_pfmc_10x1s_rest1s",
+      "sets" : 3,
+      "reps" : 10,
+      "specialSymbols" : [
+
+      ],
+      "restBetweenSets" : 10,
+      "description" : "Rapid Contractions",
+      "completed" : true,
+      "actions" : [
+        {
+          "bitDescriptor" : "pfmc",
+          "strength" : 1,
+          "holdDuration" : 1,
+          "restDuration" : 1
+        }
+      ],
+      "name" : "Rapid Contractions"
+    },
+    {
+      "id" : "pfmc_endurance",
+      "sets" : 3,
+      "reps" : 1,
+      "specialSymbols" : [
+
+      ],
+      "restBetweenSets" : 20,
+      "description" : "Endurance",
+      "completed" : true,
+      "actions" : [
+        {
+          "bitDescriptor" : "pfmc",
+          "strength" : 0.5,
+          "holdDuration" : 10,
+          "restDuration" : 0
+        },
+        {
+          "bitDescriptor" : "pfmc",
+          "strength" : 1,
+          "holdDuration" : 10,
+          "restDuration" : 0
+        },
+        {
+          "bitDescriptor" : "pfmc",
+          "strength" : 0.5,
+          "holdDuration" : 10,
+          "restDuration" : 0
+        }
+      ],
+      "name" : "Endurance"
+    },
+    {
+      "id" : "knack_3x1s_rest1s",
+      "sets" : 3,
+      "reps" : 3,
+      "specialSymbols" : [
+        {
+          "when" : 0.20000000000000001,
+          "strength" : 1,
+          "symbol" : "cough"
+        }
+      ],
+      "restBetweenSets" : 10,
+      "description" : "The Knack",
+      "completed" : true,
+      "actions" : [
+        {
+          "bitDescriptor" : "pfmc",
+          "strength" : 1,
+          "holdDuration" : 1,
+          "restDuration" : 2
+        }
+      ],
+      "name" : "The Knack"
+    }
+  ]
+}

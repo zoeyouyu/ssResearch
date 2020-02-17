@@ -1,0 +1,1779 @@
+{
+  "protocol" : {
+    "id" : "26"
+  },
+  "_version" : 2,
+  "mobile_device" : {
+    "id" : "E196E15C-8063-481D-AF5B-3DBA3A25E32A",
+    "os" : "iOS",
+    "name" : "iPhone XR",
+    "os_version" : "13.3.1"
+  },
+  "session" : {
+    "uid" : "3391C689-9828-4C40-B421-F99BE1890018",
+    "sensitivity_setting" : 62.22528076171875,
+    "timezone" : "Pacific\/Auckland",
+    "created" : "20200214164754",
+    "minimum_sensor" : [
+      775.08587646484375,
+      779.90130615234375,
+      783.20159912109375,
+      782.9915771484375,
+      782.31646728515625,
+      781.68646240234375,
+      781.38641357421875,
+      782.14398193359375
+    ],
+    "name" : "FF400061 - Session 114",
+    "workoutDay" : "71"
+  },
+  "recordings" : [
+    {
+      "filepath" : "3391C689-9828-4C40-B421-F99BE1890018_20200214-164754.data",
+      "app_version" : "1.0.39",
+      "device" : {
+        "serial_number" : "0000",
+        "manufacturer" : "JunoFem",
+        "firmware_revision" : "0.13",
+        "name" : "FF400061",
+        "sample_frequency" : 50,
+        "sample_frequency_units" : "Hz"
+      },
+      "start_time" : 1581652074220,
+      "stop_time" : 1581652099462,
+      "duration" : 25241
+    },
+    {
+      "filepath" : "3391C689-9828-4C40-B421-F99BE1890018_20200214-164825.data",
+      "app_version" : "1.0.39",
+      "device" : {
+        "serial_number" : "0000",
+        "manufacturer" : "JunoFem",
+        "firmware_revision" : "0.13",
+        "name" : "FF400061",
+        "sample_frequency" : 50,
+        "sample_frequency_units" : "Hz"
+      },
+      "start_time" : 1581652105943,
+      "stop_time" : 1581652190269,
+      "duration" : 84325
+    },
+    {
+      "filepath" : "3391C689-9828-4C40-B421-F99BE1890018_20200214-164952.data",
+      "app_version" : "1.0.39",
+      "device" : {
+        "serial_number" : "0000",
+        "manufacturer" : "JunoFem",
+        "firmware_revision" : "0.13",
+        "name" : "FF400061",
+        "sample_frequency" : 50,
+        "sample_frequency_units" : "Hz"
+      },
+      "start_time" : 1581652192731,
+      "stop_time" : 1581653096085,
+      "duration" : 903353
+    }
+  ],
+  "events" : [
+    {
+      "value" : 775.08587646484375,
+      "type" : "set_value",
+      "value_id" : "zero_channel",
+      "time" : 1581652175775
+    },
+    {
+      "value" : 779.90130615234375,
+      "type" : "set_value",
+      "value_id" : "zero_channel",
+      "time" : 1581652175775
+    },
+    {
+      "value" : 783.20159912109375,
+      "type" : "set_value",
+      "value_id" : "zero_channel",
+      "time" : 1581652175775
+    },
+    {
+      "value" : 782.9915771484375,
+      "type" : "set_value",
+      "value_id" : "zero_channel",
+      "time" : 1581652175775
+    },
+    {
+      "value" : 782.31646728515625,
+      "type" : "set_value",
+      "value_id" : "zero_channel",
+      "time" : 1581652175775
+    },
+    {
+      "value" : 781.68646240234375,
+      "type" : "set_value",
+      "value_id" : "zero_channel",
+      "time" : 1581652175775
+    },
+    {
+      "value" : 781.38641357421875,
+      "type" : "set_value",
+      "value_id" : "zero_channel",
+      "time" : 1581652175775
+    },
+    {
+      "value" : 782.14398193359375,
+      "type" : "set_value",
+      "value_id" : "zero_channel",
+      "time" : 1581652175775
+    },
+    {
+      "value" : 811.906494140625,
+      "type" : "set_value",
+      "value_id" : "max_channel",
+      "time" : 1581652180775
+    },
+    {
+      "value" : 796.8902587890625,
+      "type" : "set_value",
+      "value_id" : "max_channel",
+      "time" : 1581652180775
+    },
+    {
+      "value" : 794.49005126953125,
+      "type" : "set_value",
+      "value_id" : "max_channel",
+      "time" : 1581652180775
+    },
+    {
+      "value" : 788.759521484375,
+      "type" : "set_value",
+      "value_id" : "max_channel",
+      "time" : 1581652180775
+    },
+    {
+      "value" : 788.71453857421875,
+      "type" : "set_value",
+      "value_id" : "max_channel",
+      "time" : 1581652180775
+    },
+    {
+      "type" : "app",
+      "time" : 1581652074223,
+      "event" : "start_ambient_recording"
+    },
+    {
+      "type" : "app",
+      "time" : 1581652079225,
+      "event" : "stop_ambient_recording"
+    },
+    {
+      "type" : "user",
+      "exercise_name" : "Start Check in Pressed",
+      "time" : 1581652080042
+    },
+    {
+      "type" : "user",
+      "exercise_name" : "Dismissed Check in",
+      "time" : 1581652098935
+    },
+    {
+      "type" : "user",
+      "exercise_name" : "Squeeze and Hold exercise selected",
+      "time" : 1581652106730
+    },
+    {
+      "exercise_index" : 0,
+      "type" : "app",
+      "time" : 1581652106800,
+      "event" : "start_exercise"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652112551,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 2,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652122551,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 3,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652132551,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 4,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652142552,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 5,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "type" : "user",
+      "exercise_name" : "Pause Pressed",
+      "time" : 1581652145556
+    },
+    {
+      "type" : "user",
+      "exercise_name" : "Dismiss Workout Button Pressed",
+      "time" : 1581652147065
+    },
+    {
+      "type" : "user",
+      "exercise_name" : "Start Check in Pressed",
+      "time" : 1581652171773
+    },
+    {
+      "type" : "user",
+      "exercise_name" : "Dismissed Check in",
+      "time" : 1581652189714
+    },
+    {
+      "type" : "user",
+      "exercise_name" : "Squeeze and Hold exercise selected",
+      "time" : 1581652193217
+    },
+    {
+      "exercise_index" : 0,
+      "type" : "app",
+      "time" : 1581652193278,
+      "event" : "start_exercise"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652199029,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 2,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652209030,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 3,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652219029,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 4,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652229029,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 5,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652239029,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 6,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652249030,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 7,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652259029,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 8,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652269029,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 9,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652279030,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 10,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652289029,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 11,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652299030,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 12,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652309030,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 13,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652319030,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 14,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652329030,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 15,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652339030,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 16,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652349030,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 17,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652359030,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 18,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652369030,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 19,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652379030,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 20,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652389029,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 21,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652399030,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 2,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652409030,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 3,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652419030,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 4,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652429031,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 5,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652439030,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 6,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652449031,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 7,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652459034,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 8,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652469037,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 9,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652479034,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 10,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652489033,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 11,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652499035,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 12,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652509033,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 13,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652519032,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 14,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652529033,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 15,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652539031,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 16,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652549031,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 17,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652559032,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 18,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652569031,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 19,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652579030,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 20,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652589031,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 21,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581652599030,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 2,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581652609031,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 3,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581652619030,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 4,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581652629031,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 5,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581652639030,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 6,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581652649031,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 7,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581652659030,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 8,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581652669031,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 9,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581652679030,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 10,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581652689031,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 11,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581652699031,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 12,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581652709032,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 13,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581652719032,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 14,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581652729033,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 15,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581652739032,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 16,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581652749033,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 17,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581652759038,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 18,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581652769035,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 19,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581652779040,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 20,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_index" : 0,
+      "type" : "app",
+      "time" : 1581652789038,
+      "event" : "stop_exercise"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581652789038,
+      "event" : "start_action",
+      "exercise_index" : 0,
+      "action_index" : 21,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "type" : "user",
+      "exercise_name" : "Endurance exercise selected",
+      "time" : 1581652799535
+    },
+    {
+      "exercise_index" : 2,
+      "type" : "app",
+      "time" : 1581652799581,
+      "event" : "start_exercise"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652805333,
+      "event" : "start_action",
+      "exercise_index" : 2,
+      "action_index" : 2,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652815333,
+      "event" : "start_action",
+      "exercise_index" : 2,
+      "action_index" : 3,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652815333,
+      "event" : "start_action",
+      "exercise_index" : 2,
+      "action_index" : 2,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652825333,
+      "event" : "start_action",
+      "exercise_index" : 2,
+      "action_index" : 3,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652825333,
+      "event" : "start_action",
+      "exercise_index" : 2,
+      "action_index" : 2,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652835333,
+      "event" : "start_action",
+      "exercise_index" : 2,
+      "action_index" : 3,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652855333,
+      "event" : "start_action",
+      "exercise_index" : 2,
+      "action_index" : 2,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652865333,
+      "event" : "start_action",
+      "exercise_index" : 2,
+      "action_index" : 3,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652865333,
+      "event" : "start_action",
+      "exercise_index" : 2,
+      "action_index" : 2,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652875333,
+      "event" : "start_action",
+      "exercise_index" : 2,
+      "action_index" : 3,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652875333,
+      "event" : "start_action",
+      "exercise_index" : 2,
+      "action_index" : 2,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652885332,
+      "event" : "start_action",
+      "exercise_index" : 2,
+      "action_index" : 3,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581652905333,
+      "event" : "start_action",
+      "exercise_index" : 2,
+      "action_index" : 2,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581652915333,
+      "event" : "start_action",
+      "exercise_index" : 2,
+      "action_index" : 3,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581652915333,
+      "event" : "start_action",
+      "exercise_index" : 2,
+      "action_index" : 2,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581652925333,
+      "event" : "start_action",
+      "exercise_index" : 2,
+      "action_index" : 3,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581652925333,
+      "event" : "start_action",
+      "exercise_index" : 2,
+      "action_index" : 2,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_index" : 2,
+      "type" : "app",
+      "time" : 1581652935332,
+      "event" : "stop_exercise"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581652935333,
+      "event" : "start_action",
+      "exercise_index" : 2,
+      "action_index" : 3,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "type" : "user",
+      "exercise_name" : "Rapid Contractions exercise selected",
+      "time" : 1581652943278
+    },
+    {
+      "exercise_index" : 1,
+      "type" : "app",
+      "time" : 1581652943322,
+      "event" : "start_exercise"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652949074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 2,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652950074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 3,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652951074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 4,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652952074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 5,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652953074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 6,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652954074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 7,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652955074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 8,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652956074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 9,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652957074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 10,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652958074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 11,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652959074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 12,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652960075,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 13,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652961076,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 14,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652962074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 15,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652963074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 16,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652964075,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 17,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652965074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 18,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652966074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 19,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652967074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 20,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581652968074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 21,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652978074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 2,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652979075,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 3,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652980074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 4,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652981075,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 5,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652982074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 6,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652983074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 7,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652984075,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 8,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652985075,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 9,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652986073,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 10,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652987076,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 11,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652988074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 12,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652989074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 13,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652990074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 14,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652991075,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 15,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652992074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 16,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652993074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 17,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652994074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 18,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652995074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 19,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652996075,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 20,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581652997075,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 21,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581653007074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 2,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581653008074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 3,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581653009074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 4,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581653010074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 5,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581653011074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 6,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581653012075,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 7,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581653013074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 8,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581653014074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 9,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581653015075,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 10,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581653016074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 11,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581653017074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 12,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581653018075,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 13,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581653019074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 14,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581653020074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 15,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581653021075,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 16,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581653022074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 17,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581653023074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 18,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581653024075,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 19,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581653025074,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 20,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "exercise_index" : 1,
+      "type" : "app",
+      "time" : 1581653026074,
+      "event" : "stop_exercise"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581653026075,
+      "event" : "start_action",
+      "exercise_index" : 1,
+      "action_index" : 21,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "type" : "user",
+      "exercise_name" : "The Knack exercise selected",
+      "time" : 1581653043182
+    },
+    {
+      "exercise_index" : 3,
+      "type" : "app",
+      "time" : 1581653043219,
+      "event" : "start_exercise"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581653048971,
+      "event" : "start_action",
+      "exercise_index" : 3,
+      "action_index" : 2,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "time" : 1581653049171,
+      "exercise_name" : "The Knack",
+      "type" : "action",
+      "exercise_id" : "knack_3x1s_rest1s",
+      "action_id" : "cough"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581653049971,
+      "event" : "start_action",
+      "exercise_index" : 3,
+      "action_index" : 3,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581653051971,
+      "event" : "start_action",
+      "exercise_index" : 3,
+      "action_index" : 4,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "time" : 1581653052170,
+      "exercise_name" : "The Knack",
+      "type" : "action",
+      "exercise_id" : "knack_3x1s_rest1s",
+      "action_id" : "cough"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581653052971,
+      "event" : "start_action",
+      "exercise_index" : 3,
+      "action_index" : 5,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581653054971,
+      "event" : "start_action",
+      "exercise_index" : 3,
+      "action_index" : 6,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "time" : 1581653055171,
+      "exercise_name" : "The Knack",
+      "type" : "action",
+      "exercise_id" : "knack_3x1s_rest1s",
+      "action_id" : "cough"
+    },
+    {
+      "exercise_set" : 0,
+      "time" : 1581653055971,
+      "event" : "start_action",
+      "exercise_index" : 3,
+      "action_index" : 7,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581653065971,
+      "event" : "start_action",
+      "exercise_index" : 3,
+      "action_index" : 2,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "time" : 1581653066171,
+      "exercise_name" : "The Knack",
+      "type" : "action",
+      "exercise_id" : "knack_3x1s_rest1s",
+      "action_id" : "cough"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581653066971,
+      "event" : "start_action",
+      "exercise_index" : 3,
+      "action_index" : 3,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581653068971,
+      "event" : "start_action",
+      "exercise_index" : 3,
+      "action_index" : 4,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "time" : 1581653069171,
+      "exercise_name" : "The Knack",
+      "type" : "action",
+      "exercise_id" : "knack_3x1s_rest1s",
+      "action_id" : "cough"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581653069971,
+      "event" : "start_action",
+      "exercise_index" : 3,
+      "action_index" : 5,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581653071972,
+      "event" : "start_action",
+      "exercise_index" : 3,
+      "action_index" : 6,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "time" : 1581653072171,
+      "exercise_name" : "The Knack",
+      "type" : "action",
+      "exercise_id" : "knack_3x1s_rest1s",
+      "action_id" : "cough"
+    },
+    {
+      "exercise_set" : 1,
+      "time" : 1581653072971,
+      "event" : "start_action",
+      "exercise_index" : 3,
+      "action_index" : 7,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581653082971,
+      "event" : "start_action",
+      "exercise_index" : 3,
+      "action_index" : 2,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "time" : 1581653083171,
+      "exercise_name" : "The Knack",
+      "type" : "action",
+      "exercise_id" : "knack_3x1s_rest1s",
+      "action_id" : "cough"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581653083971,
+      "event" : "start_action",
+      "exercise_index" : 3,
+      "action_index" : 3,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581653085971,
+      "event" : "start_action",
+      "exercise_index" : 3,
+      "action_index" : 4,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "time" : 1581653086171,
+      "exercise_name" : "The Knack",
+      "type" : "action",
+      "exercise_id" : "knack_3x1s_rest1s",
+      "action_id" : "cough"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581653086971,
+      "event" : "start_action",
+      "exercise_index" : 3,
+      "action_index" : 5,
+      "action_id" : "rest",
+      "type" : "app"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581653088971,
+      "event" : "start_action",
+      "exercise_index" : 3,
+      "action_index" : 6,
+      "action_id" : "pfmc",
+      "type" : "app"
+    },
+    {
+      "time" : 1581653089171,
+      "exercise_name" : "The Knack",
+      "type" : "action",
+      "exercise_id" : "knack_3x1s_rest1s",
+      "action_id" : "cough"
+    },
+    {
+      "exercise_index" : 3,
+      "type" : "app",
+      "time" : 1581653089971,
+      "event" : "stop_exercise"
+    },
+    {
+      "exercise_set" : 2,
+      "time" : 1581653089971,
+      "event" : "start_action",
+      "exercise_index" : 3,
+      "action_index" : 7,
+      "action_id" : "rest",
+      "type" : "app"
+    }
+  ]
+}
