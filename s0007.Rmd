@@ -33,7 +33,9 @@ data[1:(end-50), ] %>% myplot(name = names(df.list)[1])
 
 ##### Remove the baseline and plot the whole
 ```{r}
-myplot(df.list[[2]][1:(end-50), ], name = names(df.list)[2])
+myplot(df.list[[2]][1:(end-50), ], name = names(df.list)[2]) + theme_classic()
+# temp
+plot.temp(df.list[[2]][1:(end-50), ], name = names(df.list)[2]) + theme_classic()
 ```
 
 ##### Get the pfmc data and plot it
@@ -44,6 +46,9 @@ myplot(df.list[[3]], name = names(df.list)[3]) + theme_classic()
 ##### Remove the baseline and plot it
 ```{r}
 myplot(df.list[[4]], name = names(df.list)[4]) + theme_classic()
+
+# temp
+plot.temp(df.list[[4]], name = names(df.list)[4]) + theme_classic()
 ```
 
 
