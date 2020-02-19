@@ -1,5 +1,5 @@
 ---
-title: "PFMproj-main"
+title: "femfit-main"
 author: "Zoe Zhou"
 date: "10/12/2019"
 output: pdf_document
@@ -9,32 +9,33 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
-10/12/2019 
-
-This data set is RAW data from subjects(physios) doing certain exercises
-||||||||||||||||||||||||||||||||Might need some cleaning|||||||||||||||||||||||||||||||||||||||
+Zip folders are downloaded from the femfit website straight away.
+DATA files are from the recording device. 
+CSV files with names ending like *_all.csv* contains all data which have missing values.  
+CSV files with names ending like .csv contains data after removing NAs.
 
 ----------------------------------------- TASK -----------------------------------------------
-We are looking for the peak pressure values among three contractions, to find which one or more than one sensors representing the active pelvic muscles. We are particularly interested in the variability of the result.
+We are looking for the peak pressure values among three contractions, to find which one(or more than one) sensors best represents the active pelvic muscles. We are particularly interested in the variability of the result.
 
 ***************************************** Note *********************************************
---Each pressure measurement includes the __baseline atmosphere pressure__ due to the great sensitivity of the sensors. We might or might not need to exclude this baseline value during the investigation. Currently we are taking the value right (within 3-5 seconds) before each contraction to be treated as the initial pressure value. 
---All the timestamps for contractions and rest, are recorded manually by the user, saved in JSON files. 
+Each pressure measurement includes the __baseline atmosphere pressure__ due to the great sensitivity of the sensors. We decided to exclude this baseline value during the investigation. Here we are taking a relatively stable resting period, usually before contractions happen.
 
-~~ Pressure values are records at a frequency of 50 Hz. ~~
-~~ So 50 measurements per second. ~~
-~~ 1 measurement every 20 milliseconds.  ~~
+All the time-stamps for each exercise, are recorded manually by the user, saved in JSON files. 
+
+ - For Jenny and Jackie's data, they are using the newest device, (e.g. Jackie is using device _FF400059_). 
+ - Pressure values are records at a frequency of 50 Hz.
+ - So 50 measurements per second. We have 1 measurement every 20 milliseconds. 
+ - iPhone 7 (Jackie) has something strange happening, which records at frequency of 40 Hz, so 1 measurement every 25 ms.
 
 
-11/12/2019 Corrected: We were using device _pfd0084_ which records measurements at a frequency of  __100 Hz__. 
+for *Kari bo* study (a bit old), We were using device _pfd0084_ , which records measurements at a frequency of  __100 Hz__. 
 So we have 100 measurements per second. 1 measurement every 10 milliseconds. 
 
 
 ***
 ##### Finding baseline: Rough Guess
 
-As each sensor has a different initial pressure value at the start of the pfmc exercise, the patterns of pressure changes are not so easy-to-understand. Hence we should remove the baseline pressure values and focus on the changes. Then we can get a better idea of which sensor has the greatest change.
+As each sensor has a different initial pressure value at the start of the PFMC exercise, the patterns of raw pressure traces are not so easy-to-understand. Hence we should remove the baseline pressure values and focus on the changes. Then we can get a better idea of which sensor has the greatest change during the actions.
 
 General Method:
 Find a rest period of at least 2 seconds with relatively stable pressure values, average it out for each sensor and treat it as the baseline.
@@ -44,17 +45,15 @@ How to find this *stable rest period*?
 
 Procedure:
 We attempted 3 times taking 3 different rest periods. 
-Attemp1: Take the first exercise, relax 30 seconds. 
+Attempt1: Take the first exercise, relax 30 seconds. 
 
-Attempt2: Take all the time before the first contraction. Means when the device started recording, we get rest data, until the subject start to contract.
+Attempt2: Take all the time before the first contraction. Means when the device started recording, we get rest data, until the participant start to contract.
 
 Attempt3: Take the 15s rest time within the pfmc exercise. 
 
-After taking out the average pressure values for each sensor, all these 3 trials gave very similar output. Regarding to the negative values, they can be explained by the sucction of the sensor member, resulting the pressure decrease.
+After taking out the average pressure values for each sensor, all these 3 trials gave very similar output. Regarding to the negative values, they can be explained by the air bubbles in the sensor encapsulation.
 
-However, the 3rd attempt gave the most reliable initial value(closest to 0), so we will be using this approach for all subjects.
-
-----------See R code from [s0007.Rmd] ("C:/Users/Pluie/Desktop/SS research/ssResearch/7542a8d335c2d356_7_csv/s0007/s0007.rmd")
+However, attempt3 gave the most reliable initial value (closest to 0), so we decided to stick to this approach for all participants.
 
 
 ##### Now call the big nice function and check out the graphic results
@@ -65,11 +64,12 @@ data_folders = list.files(pattern = "_csv")
 # Load in all the helper functions
 source("Functions.R")
 
-# Get all pfmc data
+# Get all pfmc data list
 pfmcdatalist = lapply(data_folders, process)
 
-# Extract out baseline removed data (aka pfmcchange data) from all 3 participants
+# Extract out baseline removed data (named as pfmcchange data) from all 3 participants
 pfmcchange.df.list = list()
+
 for (i in 1:length(pfmcdatalist)) {
   pfmcchange.df.list[[i]] = pfmcdatalist[[i]][[4]]
   names(pfmcchange.df.list)[i] = names(pfmcdatalist[[i]])[4]
