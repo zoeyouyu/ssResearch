@@ -19,352 +19,145 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 # Found the folder that contains jenny data
-folder = list.files(pattern = "jenny 114", full = TRUE)
-list.files(folder)
+folder = list.files(pattern = "jenny 114", full.names = TRUE, recursive = FALSE)
 
-```
-
-```{r}
-(all.csv = list.files(folder, pattern = ".csv$", full.names = TRUE))
-all.csv = all.csv[-grep("all", all.csv)]
-```
-
-### Getting information in JSON file (the timestamps where the exercise was selected - these can help our segementation process)
-```{r}
 source("Functions.R")
-session = unlist(fromJSON(file = list.files(path = folder, pattern = "session.json", recursive = TRUE, full.names = TRUE)))
-# Find all exercise names
-lines = grep("exercise selected", session)
-
-exercise.string = unname(session[lines])
-
-# Find where `Squeeze and hold` exercise info locate in exercise.string
-
-squeeze_and_hold_exercise_order = grep("Squeeze and Hold", exercise.string)
-squeeze_and_hold_line = lines[squeeze_and_hold_exercise_order]
-
-
-# Strangely, We have 2 squeeze_and_hold_indices
-# Check if "Pause" had been pressed between this 2 selection
-# If Paused, take the second one as the squeeze_and_hold start time
-if (length(squeeze_and_hold_line) > 1) {
-  if (any(grepl("Pause", session[squeeze_and_hold_line[1]:squeeze_and_hold_line[2]]))) {
-  squeeze_and_hold_line = squeeze_and_hold_line[2]
-  squeeze_and_hold_exercise_order = squeeze_and_hold_exercise_order + 1
-  }
-}
-
-
-# The next line is the time information
-squeeze_and_hold_start_time = as.numeric(session[squeeze_and_hold_line + 1])
-
-# Find where next exercise info locate in exercise.string
-next_exercise_name = exercise.string[squeeze_and_hold_exercise_order + 1]
-next_exercise_line = lines[squeeze_and_hold_exercise_order + 1]
-# The next line is the time information
-next_start_time = as.numeric(session[next_exercise_line + 1])
-
+df.list = get.df.list(folder)
 ```
 
+## Step 1. Have an overall peek at our data
+##### One of them maybe ambient data - usually df1 - need to be decided manually. Sometimes data might be broken due to the Bluetooth connection lost.
 
-### Read in all data 
-```{r}
-df.list = lapply(all.csv, read.csv)
-
-names(df.list) = paste0("df", 1:length(df.list))
-```
-
-### A helper function that define the column names for each df
-```{r}
-define.col = function(df) {
-  colnames(df) = c("rectime", paste0("p", 1:8), paste0("t", 1:8))
-  df
-}
-```
-
-### Define the column names for all dfs
-```{r}
-df.list = lapply(df.list, define.col)
-```
-
-
-### Check temperature
-
+##### Check temperature
 ```{r}
 lapply(df.list, plot.temp)
 ```
 
-### Check Pressure
 
+##### Check Pressure
 ```{r}
-lapply(df.list, plot2)
+lapply(df.list, myplot)
 ```
 
+#### Comments: It seems like df3 is the whole recording, df1 is the ambient data, df2 is recording for the maximal channel?? Not too sure.
 ```{r}
 whole = df.list[[3]]
 ```
-
-
-## Remove baseline values using the first 3 seconds' data (we consider it as the relax period)
+#### Putting Pressure and temperature side by side and have a look
 ```{r}
-first3seconds = whole %>% filter(rectime < 3000)
-
-plot2(first3seconds, name = "first 3 seconds")
+side.by.side(pressuredata = whole, tempdata = whole, name = "the whole recording")
 ```
 
-### Look at the whole recording with temperature
+## Step 2. Remove baseline.
+##### Default - take the first 3 seconds' data (we consider it as the relax period) - can manually change it to 2 - 5 seconds
 ```{r}
-change = baseline(whole, first3seconds)
-p = myplot(change, name = "the whole recording (baseline removed)")
-t = plot.temp(whole, name = "the whole recording (baseline removed)")
-ggarrange(p + rremove("xlab"), 
-                   t,
-                    ncol = 1, nrow = 2, align = "v", 
-                   common.legend = TRUE, legend = "right")
+first_n_seconds = choose.baseline(whole)
 ```
 
-
-## Segementation (if needed)
-### Manually sectioned bb seconds before `Rapid Contractions` starts (to get just `Squeeze and hold`)
+#### After removal, take a look at the whole recording with temperature
 ```{r}
-p = change %>% filter(rectime < (next_start_time - squeeze_and_hold_start_time)) %>%
-  myplot(name = "Squeeze and hold") + theme_classic()
+# our dataset called `change` now (since after removal, we have the pressure change for each sensor)
+change = baseline(whole, first_n_seconds)
 
-t = whole %>% filter(rectime < (next_start_time - squeeze_and_hold_start_time)) %>%
-  plot.temp(name = "Squeeze and hold") + theme_classic()
+side.by.side(pressuredata = change, tempdata = whole, name = "the whole recording (baseline removed)")
 
-ggarrange(p + rremove("xlab"), 
-                   t,
-                    ncol = 1, nrow = 2, align = "v", 
-                   common.legend = TRUE, legend = "right")
-
-#ggsave("Temp.png", width = 10, height = 5)
-
-```
-
-### Comments: The negative values in the graph above were resulted from the sensors. It doesn't mean we removed baseline values wrongly.
-### When the sensors were being contracted  by the muscles around, they were being sucked, and might be stuck for a bit. After contraction, the muscle relaxed ( during the rest time), the sensors were trying to go back to its original place *slowly.* Hence we observe not always just a flat line (e.g red, green sensors in the graph above), instead some of the sensors slowly jumped back from negative to 0. (e.g. The yellow, orange and purple in the graph above)
-
-
-
-### Get the peak pressure values
-```{r}
-change$peak = apply(change[, paste0("p", 1:8)], 1, max)
-```
-
-## Individual PFMCs
-
-### Emphasize the peaks
-```{r}
-plot2(change, name = "the whole recording") + geom_line(aes(x = rectime, y = peak), col = "black")
+#ggsave("Whole (with temp).png", width = 10, height = 5)
 ```
 
 
-### Can we smooth the peak pressure values? `span` is really important here!!!!!!!!!!
-```{r}
-tidydata = tidy(change)
-lo.whole = loess(peak ~ rectime, data = tidydata, span = 0.01)
-plot(tidydata$rectime, tidydata$peak, pch = 21, cex = 0.5)
+## Step 3. Cut the whole to get Squeeze and Hold (optional).
 
-lines(tidydata$rectime[order(tidydata$rectime)],
-      predict(lo.whole)[order(tidydata$rectime)],
-      col = "red", lwd = 2)
+```{r}
+# Check if need to trim
+trim.both(folder, change, whole, trim = 0, plot.both = FALSE)
 ```
 
-### Get smoothed.peak.df - can be used in the peaks and changepoints detection later (sometimes give better results)
+Dont neeed trim, lets plot both temperature and pressure side by side.
 ```{r}
-
-smoothed.peak.df = unique(data.frame(rectime = tidydata$rectime[order(tidydata$rectime)], 
-                            peak = predict(lo.whole)[order(tidydata$rectime)]))
-smoothed.peak.df$id = 1:nrow(smoothed.peak.df)
-
-# Plot the smooth line
-ggplot(data = tidydata) +
-  geom_line(aes(x = rectime, y = pressure, color = sensor)) +
-  geom_line(data = smoothed.peak.df, aes(x = rectime, y = peak), size = 1) +
-  labs(x = "Recording Time (in s)", y = "Pressure Change (in mm Hg)",
-       title = "Pressure trace from all sensors with smoothed line of peak") + 
-    scale_color_brewer(palette = "Set1") + 
-  guides(color = guide_legend(override.aes = list(size = 5)))
-
-#ggsave("Colored Pressure traces with Smoothed Line.png", width = 10, height = 4)
+trim.both(folder, change, whole, trim = 0, plot.both = TRUE)
+#ggsave("Squeeze and hold (with temp).png", width = 10, height = 5)
 ```
 
-### Get the top n peaks.
+#### Decided to do smoothing
+## Step 4. Prepare for segmentation.
 
-## Before calling `findpeaks` function, set a threshold called noise to be ignored (not picked up as a peak - a potential event)
+##### If good - Peak pressure trace?
 ```{r}
-# Get the baseline noise from the first 5 seconds of data
-noise = change %>% 
-  tidy() %>%
-  filter(rectime < 5000) %>%
-  summarise(maxdiff = max(pressure) - min(pressure)) %>%
-  as.numeric()
-
-change %>%
-  filter(rectime < 5000) %>% plot2()
-```
-
-#### Decided not to use smoothed.peak.df, original peak data works very well.
-
-#### Note: changed minpeakdistane to 700 !!!!! Depends on the participant (time interval between contractions varies!!!!!!!!!!)
-```{r}
-top_n_peaks = findpeaks(smoothed.peak.df$peak, minpeakdistance = 700, minpeakheight = noise)
-top_n_peaks_indices = sort(top_n_peaks[, 2])
-
-### Check how many peaks we got
-(n_peaks = length(top_n_peaks_indices))
-```
-
-### Comments: n_peaks ideally should = 26, since we have 20 PFMCs in `squeeze and hold`, 2 rapids, 2 endurance and 2 knacks. But very often, the first bump in endurance exercise will be picked up as a peak. See graph below.
-
-
-```{r}
-plot(smoothed.peak.df$peak, type = "l")
-points(top_n_peaks[, 2], top_n_peaks[, 1], pch = 15, col = "red")
-text(top_n_peaks[, 2] + 300, top_n_peaks[, 1] + 2, as.character(top_n_peaks[, 2]))
-```
-
-### Greedy method ###
-#### Trying to get  `n_peaks*2` change points at once using Binary Segementation, `Q` has been manually changed to give the best results. 
-```{r}
-all.binseg = cpt.mean(smoothed.peak.df$peak, method = "BinSeg", Q = n_peaks*2-5)
-greedy.fit = cpts(all.binseg)
-```
-
-```{r}
-param.est(all.binseg)
+change = get.peak.trace(change)
 ```
 
 
+##### If noisy - Can we smooth the peak pressure values? `span` is really important here
 ```{r}
-plot(all.binseg)
+tidydata = tidy.pressure(change)
+smoothed.peak.df = get.smooth.line(tidydata)
 ```
 
-### Doing pretty well for pfmcs, not too good for endurance and the knack.
+## Step 4.5. Detect peaks (optional - it picks up small peaks sometimes so it's a bit useless)
 
+
+Default minpeakdistance = 500 (each contraction last around 5s). Change to 7s here. 
+This really depends on the participant (time length of contractions varies! Sometimes 7s, 8s, or 10s)
+
+##### Get the top n peaks from smoothed.peak.df
 ```{r}
-greedy.fit
+n_peaks = get.peaks(change, smoothed.peak.df, noise.timelength = 5000, minpeakdistance = 700)
 ```
 
 
-## For whole data (8 sensors) - Back to our original data
+## Step 5. Segmentation
+```{r}
+greedy.fit = get.greedy.fit(smoothed.peak.df, n_peaks)
+```
+
+
+
+#### Comments: notice some small red lines we dont want, n_peaks ideally should = 26, since we have 20 PFMCs in `squeeze and hold`, 2 rapids, 2 endurance and 2 knacks. But very often, the first bump in endurance exercise will be picked up as a peak. See graph below.
+
+```{r}
+greedy.fit = get.greedy.fit(smoothed.peak.df, Q = n_peaks*2-5)
+```
+
+
+#### Comments
+Usually doing pretty well (catch the changes) for `Squeeze and Hold`, very good for the `Rapids` as well. But not very great for Endurance exercise and the Knacks. Since they have different patterns of pressure traces. The endurance has 2 jumps, one halfway, one maximum contraction. The knack is a combination of contraction and cough, so somewhat complex for the algorithm to identify. 
+
+In that case we can just throw out the last few points (endurance and knacks) for now.
+
+## Step 6. Plot
 ```{r}
 # Let's ignore the endurance and the knack for now (the last 8 changepoints excluded)
-mypoints = greedy.fit[1:(length(greedy.fit)-19)]
-raw.start.end.rectime = change$rectime[mypoints] 
+mypoints = drop.points(greedy.fit, dropfirst = 0, droplast = 19)
 
-n_event = 30
+# Check how it looks like without shifting
+how.to.shift(change, mypoints, n_event = 30)
 ```
 
-## Just double check if we actually get the changepoints right (can manually modify a bit here if needed)
+#### Decided to shift
 ```{r}
-
-event_start = seq(1, n_event, 1)*2 - 1
-
-event_end = seq(1, n_event, 1)*2
-
-# Shift the ending time of Contraction NO.1 - 11, and NO.29 in exercise`Squeeze and hold` 30 points to the right (so the graph looks nicer)
-mypoints[event_end[c(1:11, 29)]] = mypoints[event_end[c(1:11, 29)]] + 50
-
-
-# Shift the starting time of all pfmcs in exercise `Squeeze and hold` 50 points to the left (so the graph looks nicer)
-mypoints[event_start[c(13:29)]] = mypoints[event_start[c(13:29)]] - 50
-
-mypoints[event_start[c(4, 12, 18, 21, 30)]] = mypoints[event_start[c(4, 12, 18, 21, 30)]] - 30
-
-# Shift the starting time of Contraction NO.18, 21, 28, 29 in exercise `Squeeze and hold` 10 points to the left (so the graph looks nicer)
-#mypoints[event_start[c(4, 6, 8, 10, 30)]] = mypoints[event_start[c(4, 6, 8, 10, 30)]] - 50
-
-# # Shift the ending time of Contraction NO.1 - 11, and NO.29 in exercise`Squeeze and hold` 30 points to the right (so the graph looks nicer)
-# mypoints[event_end[c(4, 29)]] = mypoints[event_end[c(4, 29)]] + 10
-
-start.end.rectime = change$rectime[mypoints] 
-
-# plot2(change) + theme_void() + 
-#   geom_vline(xintercept = start.end.rectime)
+how.to.shift(change, mypoints, n_event = 30, extra = TRUE,
+             start.go.left = 13:29, start.go.left.size = 50, 
+             start.go.extra.left = c(4, 12, 18, 21, 30), start.go.extra.left.size = 30,
+             end.go.right = c(1:11, 29), end.go.right.size = 30)
 
 ```
 
-## Let's have a look at each individual event (just in squeeze and hold & rapids) !!!!
+
+##### Now they should look perfect and ready to be saved
 ```{r}
-for (i in 1:n_event) {
-  start = start.end.rectime[i*2 - 1]
-  end = start.end.rectime[i*2]
-  
-print(myplot(getsubdata(change, start, end), name = paste0("Event No.", i)) + 
-          theme_classic() +
-          theme(axis.text = element_text(face = "bold", size = 14),
-                axis.title = element_text(face = "bold", size = 14)))
-  
-  ggsave(paste0("Event No.", i, ".png"), height = 5, width = 8)
-}
+# how.to.shift(change, mypoints, n_event = 30, extra = TRUE, save = TRUE
+#              start.go.left = 13:29, start.go.left.size = 50, 
+#              start.go.extra.left = c(4, 12, 18, 21, 30), start.go.extra.left.size = 30,
+#              end.go.right = c(1:11, 29), end.go.right.size = 30)
 
 ```
 
+## Step 7. Average out
+We want to look at how the pressure values change over contractions, now we are going to take the mean pressure value within each contraction, for each sensor, then plot the mean values over 20 contractions. 
 
-
-### Dropping the starting (1.5s) and ending (1.5s) baseline data for each contraction
+Sometimes during the exercise, the femfit slips a bit, the position change occurs. From this graph, we can have a good idea which sensors are contributing the most and how does the shift happen (if it happens).
 ```{r}
-contraction.data = list()
-for (i in 1:n_event) {
-    contraction.data[[i]] = getsubdata(change, start.end.rectime[i*2 - 1] + 1500, start.end.rectime[i*2] - 1500)
-    print(myplot(contraction.data[[i]], name = paste0("Contraction No.", i)) + 
-          theme_classic())
-  }
+contraction.df = get.contraction.df(change, mypoints, n_pfmc = 30, drop.start = 1500, drop.end = 1500)
+get.averaged.plot(contraction.df, save = TRUE)
 ```
-
-### Mutate a new column `contration id` for each contraction data, then combine all together
-```{r}
-for (i in 1:length(contraction.data)) {
-  contraction.data[[i]] = contraction.data[[i]] %>% 
-    mutate(contraction = as.factor(i))
-}
-
-contraction.df = do.call("rbind", contraction.data)
-head(contraction.df)
-```
-
-### Averaging each contraction for each sensor
-
-```{r}
-avged.df = contraction.df %>% 
-  tidy() %>% 
-  group_by(contraction, sensor) %>% 
-  summarise(mean = mean(pressure), sd = sd(pressure, na.rm = TRUE))
-
-ggplot(data = avged.df, aes(x = contraction, y = mean, group = sensor, color = sensor)) +
-  geom_point(size = 5) +
-  geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = 0.2) +
-  labs(title = "Mean Pressure over contraction", y = "Mean pressure (mmHg)", x = "Contraction",
-       subtitle = "Jenny session 114") +
-  theme_classic() +
-  scale_color_brewer(palette = "Set1")
-
-
-#ggsave("Mean pressure for each sensor over contraction.png", width = 10, height = 5)
-
-```
-
-
-
-
-
-### Endurance and the knack
-```{r}
-
-where_rapids_end = mypoints[length(mypoints)]
-
-endurance_and_knack = getsubdata(change, start = change$rectime[where_rapids_end], stop = max(change$rectime))
-
-plot2(endurance_and_knack, name = "The rest")
-```
-
-
-
-
-
-
-
-
 

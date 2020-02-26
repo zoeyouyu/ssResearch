@@ -201,7 +201,8 @@ myplot = function(data, name = NULL) {
     labs(x = "Time (s)", y = "Pressure (mmHg)",
          title = paste("Pressure trace from", name)) +
     scale_color_brewer(palette = "Set1") + 
-    guides(color = guide_legend(override.aes = list(size = 5)))
+    guides(color = guide_legend(override.aes = list(size = 5))) +
+    theme_classic()
   
 }
 
@@ -221,7 +222,8 @@ plot2 = function(data, name = NULL){
     labs(x = "Recording Time (ms)", y = "Pressure (mmHg)",
          title = paste("Pressure trace from", name)) +   
     scale_color_brewer(palette = "Set1") + 
-    guides(color = guide_legend(override.aes = list(size = 5)))
+    guides(color = guide_legend(override.aes = list(size = 5))) +
+    theme_classic()
   
 }
 
@@ -255,7 +257,8 @@ plot.temp = function(data, name = NULL){
     labs(x = "Time (s)", y = "Tempetarue (Celsius)",
          title = paste("Temperature from", name)) +   
     scale_color_brewer(palette = "Set1") + 
-    guides(color = guide_legend(override.aes = list(size = 5)))
+    guides(color = guide_legend(override.aes = list(size = 5))) +
+    theme_classic()
   
 }
 ###### A function to remove baseline values
@@ -419,9 +422,9 @@ get.df.list = function(folder){
   # Get the all.csv files in this folder
   all.csv = list.files(folder, pattern = ".csv$", full.names = TRUE)
   
-  if (any(grepl("all", all.csv))) {
+  if (any(grepl("all|squeeze_and_hold", all.csv))) {
     # Ignore _all.csv files
-    all.csv = all.csv[-grep("all", all.csv)]
+    all.csv = all.csv[-grep("all|squeeze_and_hold", all.csv)]
   }
   
   # Read in all data 
@@ -437,14 +440,14 @@ get.df.list = function(folder){
 
 ### A helper function that combines all df
 combinedf = function(df.list, timegap = 20) {
-  whole = do.call("rbind", df.list[-1])
+  whole = do.call("rbind", df.list)
   rownames(whole) = 1:nrow(whole)
   whole$rectime = seq(0, (nrow(whole) - 1)*timegap, timegap)
   
   return(whole)
 }
 
-  
+
 ### A helper function that plots pressure and temp side by side
 side.by.side = function(pressuredata, tempdata, name = "the whole recording") {
   # pressure plot (p)
@@ -458,9 +461,52 @@ side.by.side = function(pressuredata, tempdata, name = "the whole recording") {
             common.legend = TRUE, legend = "right"))
 }
 
+### A helper function that trims and plot `SNH`
+trim.both = function(folder, change, whole, trim = 0, plot.both = FALSE){
+  # Get json time when `Squeeze and hold` starts and when does it end (the next exercise starts)
+  exercise_start_time = as.numeric(getjsontime(folder)[1])
+  
+  next_start_time = as.numeric(getjsontime(folder)[2])
+  
+  pressuredata = change %>% filter(rectime < (next_start_time - exercise_start_time - trim))
+  tempdata = whole %>% filter(rectime < (next_start_time - exercise_start_time - trim))
+  
+  if (plot.both == TRUE) {
+      side.by.side(pressuredata, tempdata, name = "Squeeze and hold") }
+  
+  else {plot2(pressuredata, name = "Squeeze and hold") }
+  
+}
+  
+
+### A helper function to get the peak trace
+get.peak.trace = function(change) {
+  # Not interested in the temperature from now on, only take column p1-p8 
+  change$peak = apply(change[, paste0("p", 1:8)], 1, max)
+  
+  # Can Pass the subset as data frame when we are happy with the cutting in step 3
+  # squeeze_and_hold = change %>% filter(rectime < (next_start_time - squeeze_and_hold_start_time))
+  
+  # Emphasize the peaks
+  plot2(change) + geom_line(aes(x = rectime, y = peak), col = "black")
+  
+  return(change)
+}
 
 
 
+### A helper function that plots the choose relax period and return it
+choose.baseline = function(whole, relax.time.length = 3000){
+  
+  n = relax.time.length / 1000
+  
+  first_n_seconds = whole %>% filter(rectime < relax.time.length)
+  
+  # Look at this first 5 seconds - if abnormal choose another period
+  print(plot2(first_n_seconds, name = paste("first", n, "seconds")))
+  
+  return(first_n_seconds)
+}
 
 ### A helper function that smooths the peaks and return 2 pretty graphs
 get.smooth.line = function(tidydata, span = 0.01) {
@@ -483,7 +529,8 @@ get.smooth.line = function(tidydata, span = 0.01) {
     labs(x = "Recording Time (in s)", y = "Pressure Change (in mm Hg)",
          title = "Pressure trace from all sensors with smoothed line of peak") +   
     scale_color_brewer(palette = "Set1") + 
-    guides(color = guide_legend(override.aes = list(size = 5)))
+    guides(color = guide_legend(override.aes = list(size = 5))) +
+    theme_classic()
   
   print(g)
   #ggsave("Colored Pressure traces with Smoothed Line.png", width = 10, height = 5)
@@ -494,19 +541,19 @@ get.smooth.line = function(tidydata, span = 0.01) {
 
 
 #### A function that picks up the peaks and print plots
-get.peaks = function(change, smoothed.peak.df, timelength = 5000, minpeakdistance = 500){
+get.peaks = function(change, smoothed.peak.df, noise.timelength = 5000, minpeakdistance = 500){
   # Before calling `findpeaks` function, set a threshold called noise to be ignored (not picked up as a peak - a potential event)
   # Get the baseline noise from the first 5 seconds of data
   
   noise = change %>% 
     tidy.pressure() %>%
-    filter(rectime < timelength) %>%
+    filter(rectime < noise.timelength) %>%
     summarise(maxdiff = max(pressure) - min(pressure)) %>%
     as.numeric()
   
   change %>%
-    filter(rectime < timelength) %>% 
-    plot2(name = paste("the first", timelength/1000, "seconds  - as our baseline noise"))  %>%
+    filter(rectime < noise.timelength) %>% 
+    plot2(name = paste("the first", noise.timelength/1000, "seconds  - as our baseline noise"))  %>%
     print()
   
   top_n_peaks = findpeaks(smoothed.peak.df$peak, minpeakdistance = minpeakdistance, minpeakheight = noise)
@@ -557,7 +604,12 @@ how.to.shift = function(change, mypoints, n_event = 20, save = FALSE,
                         start.go.left = NULL, start.go.left.size = 0,
                         start.go.right = NULL,  start.go.right.size = 0,
                         end.go.left = NULL, end.go.left.size = 0,
-                        end.go.right = NULL, end.go.right.size = 0) {
+                        end.go.right = NULL, end.go.right.size = 0,
+                        extra = FALSE,
+                        start.go.extra.left = NULL, start.go.extra.left.size = 0,
+                        start.go.extra.right = NULL,  start.go.extra.right.size = 0,
+                        end.go.extra.left = NULL, end.go.extra.left.size = 0,
+                        end.go.extra.right = NULL, end.go.extra.right.size = 0) {
   
   raw.start.end.rectime = change$rectime[mypoints]
   
@@ -582,7 +634,23 @@ how.to.shift = function(change, mypoints, n_event = 20, save = FALSE,
   # Shift the ending time of certain contractions (stored in end.go.right) `end.go.right.size` points to the right
   mypoints[event_end[end.go.right]] = mypoints[event_end[end.go.right]] + end.go.right.size
   
-  
+  if (extra == TRUE) {
+    # Shift the starting time of certain contractions (stored in start.go.extra.left) `start.go.extra.left.size` points to the right
+    mypoints[event_start[start.go.extra.left]] = mypoints[event_start[start.go.extra.left]] - start.go.extra.left.size
+    
+    
+    # Shift the starting time of certain contractions (stored in start.go.extra.right) `start.go.extra.right.size` points to the right
+    mypoints[event_start[start.go.extra.right]] = mypoints[event_start[start.go.extra.right]] + start.go.extra.right.size
+    
+    
+    # Shift the ending time of certain contractions (stored in end.go.extra.left) `end.go.extra.left.size` points to the left
+    mypoints[event_end[end.go.extra.left]] = mypoints[event_end[end.go.extra.left]] - end.go.extra.left.size
+    
+    
+    # Shift the ending time of certain contractions (stored in end.go.extra.right) `end.go.extra.right.size` points to the right
+    mypoints[event_end[end.go.extra.right]] = mypoints[event_end[end.go.extra.right]] + end.go.extra.right.size
+    
+  }
   start.end.rectime = change$rectime[mypoints] 
   
   ##### Let's have a look at each individual event (just in squeeze and hold )
@@ -622,12 +690,14 @@ get.participant_session_name = function(folder) {
 
 ##### A function that drops the starting (1s) and ending (1s) data for each contraction - just want the flat lines, save each as a dataframe, then store in a list
 
-get.contraction.df = function(change, mypoints, drop.start = 1000, drop.end = 1000) {
+get.contraction.df = function(change, mypoints, n_pfmc, drop.start = 1000, drop.end = 1000) {
   
   raw.start.end.rectime = change$rectime[mypoints]
   
+#
   contraction.data = list()
-  for (i in 1:20) {
+  
+  for (i in 1:n_pfmc) {
     contraction.data[[i]] = getsubdata(change, 
                                        start = raw.start.end.rectime[i*2 - 1] + drop.start, 
                                        stop = raw.start.end.rectime[i*2] - drop.end)
@@ -665,12 +735,15 @@ get.averaged.plot = function(contraction.df, save = FALSE) {
     labs(title = "Mean Pressure over contraction", 
          x = "Contraction",
          y = "Mean pressure (mm Hg)", 
-         subtitle = participant_session_name) +
+         subtitle = participant_session_name)  + 
     theme_classic() +
+    theme(axis.text = element_text(face = "bold", size = 14),
+          axis.title = element_text(face = "bold", size = 14)) +
     scale_color_brewer(palette = "Set1")
   
   print(g)
   if (save == TRUE) {
+    
     #Save these image to impress your supervisors again xD
     ggsave("Mean pressure for each sensor over contraction.png", width = 10, height = 5)
   }
