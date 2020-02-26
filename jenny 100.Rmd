@@ -1,0 +1,177 @@
+---
+title: "jenny 100"
+author: "Zoe Zhou"
+date: "05/02/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Pressure values are records at a frequency of 50 Hz. 
+## So 50 measurements per second. 
+## 1 measurement every 20 milliseconds. 
+
+
+```{r}
+# Found the folder that contains jenny data
+folder = list.files(pattern = "jenny 100", full.names = TRUE, recursive = FALSE)
+
+source("Functions.R")
+df.list = get.df.list(folder)
+```
+
+## Step 1. Have an overall peek at our data
+##### One of them maybe ambient data - usually df1 - need to be decided manually. Sometimes data might be broken due to the Bluetooth connection lost.
+
+##### Check temperature
+```{r}
+lapply(df.list, plot.temp)
+```
+
+##### Check Pressure
+```{r}
+lapply(df.list, myplot)
+```
+
+### Comments: Apparently there was no Bluetooth connection lost, we have 2 files - one ambient data, one whole recording 
+```{r}
+whole = df.list[[2]]
+```
+
+#### Putting Pressure and temperature side by side and have a look
+```{r}
+side.by.side(pressuredata = whole, tempdata = whole, name = "the whole recording")
+```
+### Comments: we can possibly use df1 - the ambient data as baseline but it doesn't look like a great idea (after trying).
+
+## Step 2. Remove baseline.
+##### Default - take the first 3 seconds' data (we consider it as the relax period) - can manually change it to 2 - 5 seconds
+```{r}
+first_n_seconds = choose.baseline(whole)
+```
+
+#### After removal, take a look at the whole recording with temperature
+```{r}
+# our dataset called `change` now (since after removal, we have the pressure change for each sensor)
+change = baseline(whole, first_n_seconds)
+
+side.by.side(pressuredata = change, tempdata = whole, name = "the whole recording (baseline removed)")
+
+#ggsave("Whole (with temp).png", width = 10, height = 5)
+```
+
+
+
+
+## Step 3. Cut the whole to get Squeeze and Hold (optional).
+
+```{r}
+# Check if need to trim
+trim.both(folder, change, whole, trim = 0, plot.both = FALSE)
+```
+
+Dont neeed trim, lets plot both temperature and pressure side by side.
+```{r}
+trim.both(folder, change, whole, trim = 0, plot.both = TRUE)
+#ggsave("Squeeze and hold (with temp).png", width = 10, height = 5)
+```
+
+#### Skipped smoothing. Decided not to use smoothed.peak.df, original peak data works very well.
+
+## Step 4. Prepare for segmentation.
+#### Method 
+Each contraction in the `Squeeze and Hold` exercise is very interesting, here we are going to zoom in and give PFMCs (Pelvic Floor Muscle Contractions) a closeup check.
+
+To achieve this, we have to get the exact starting/ending time for each contraction. We need help from some magical algorithms. There is a variety of options available including PCA (Principle Component Analysis), Changepoints detection, Gradient check, Peak detection, Classification tree and cross-validation model (fancy machine learning approach - talk to David Chen if interested, his model was very impressive but I'm too dumb(lazy) to recreate that). After trying different methods, I decided to use Smoothing and changepoints detection. 
+
+For some `well-behaved` pressure traces, we can use the *peak pressure trace* to represent the overall pattern of the trace. 
+
+##### If good - Peak pressure trace?
+```{r}
+change = get.peak.trace(change)
+```
+
+
+## Step 4.5. Detect peaks (optional - it picks up small peaks sometimes so it's a bit useless)
+
+
+Default minpeakdistance = 500 (each contraction last around 5s). Change to 7s here. 
+This really depends on the participant (time length of contractions varies! Sometimes 7s, 8s, or 10s)
+
+##### Get the top n peaks from smoothed.peak.df
+```{r}
+n_peaks = get.peaks(change, smoothed.peak.df = change, noise.timelength = 5000, minpeakdistance = 700)
+```
+ 
+
+## Step 5. Segmentation
+```{r}
+greedy.fit = get.greedy.fit(change, n_peaks)
+```
+
+
+
+#### Comments: notice some small red lines we dont want, n_peaks ideally should = 26, since we have 20 PFMCs in `squeeze and hold`, 2 rapids, 2 endurance and 2 knacks. But very often, the first bump in endurance exercise will be picked up as a peak. See graph below.
+
+```{r}
+greedy.fit = get.greedy.fit(change, n_peaks = 26)
+```
+
+
+#### Comments
+Usually doing pretty well (catch the changes) for `Squeeze and Hold`, very good for the `Rapids` as well. But not very great for Endurance exercise and the Knacks. Since they have different patterns of pressure traces. The endurance has 2 jumps, one halfway, one maximum contraction. The knack is a combination of contraction and cough, so somewhat complex for the algorithm to identify. 
+
+In that case we can just throw out the last few points (endurance and knacks) for now.
+
+## Step 6. Plot
+```{r}
+# Let's ignore the endurance and the knack for now (the last 8 changepoints excluded)
+mypoints = drop.points(greedy.fit, dropfirst = 0, droplast = 8)
+
+# Check how it looks like without shifting
+how.to.shift(change, mypoints, n_event = 22)
+```
+
+##### Decided to shift 
+```{r}
+how.to.shift(change, mypoints, n_event = 22, extra = TRUE,
+             start.go.left = 1:(length(mypoints)/2), start.go.left.size = 30, 
+             start.go.extra.left = 13, start.go.extra.left.size = 30,
+             end.go.right = 1:(length(mypoints)/2), end.go.right.size = 30)
+```
+
+
+##### Just double check if we actually get the changepoints right
+```{r}
+# plot2(change) + theme_void() + 
+#   geom_vline(xintercept = start.end.rectime)
+```
+
+##### Now they should look perfect and ready to be saved
+```{r}
+# how.to.shift(change, mypoints, n_event = 22, save = TRUE
+#              start.go.left = 1:(length(mypoints)/2), start.go.left.size = 30, 
+#              start.go.extra.left = 13, start.go.extra.left.size = 30,
+#              end.go.right = 1:(length(mypoints)/2), end.go.right.size = 30)
+
+```
+
+## Step 7. Average out
+We want to look at how the pressure values change over contractions, now we are going to take the mean pressure value within each contraction, for each sensor, then plot the mean values over 20 contractions. 
+
+Sometimes during the exercise, the femfit slips a bit, the position change occurs. From this graph, we can have a good idea which sensors are contributing the most and how does the shift happen (if it happens).
+```{r}
+contraction.df = get.contraction.df(change, mypoints, n_pfmc = 20, drop.start = 1000, drop.end = 5000)
+get.averaged.plot(contraction.df, save = TRUE)
+```
+
+
+
+
+
+
+
+
